@@ -1,4 +1,4 @@
-**Completion:** 56/71 tasks completed (78.9%)
+**Completion:** 68/71 tasks completed (95.8%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -13,7 +13,7 @@
 |---|------|---------------|--------------|---------------------|----------------|--------|
 | B001 | Application entrypoint (FastAPI/ASGI) for serving API | `backend/app/main.py`, `backend/api/app.py` | B002 | App boots, router wiring works, health endpoint exists | Unit + integration | [x] |
 | B002 | Central configuration (env, paths, defaults, validation) | `backend/core/config.py` | - | All required env vars defined, validated, secrets not logged | Unit | [x] |
-| B003 | Logging/observability setup (structured logging, correlation IDs) | `backend/utils/logging*`, middleware | B001 | Structured logs, correlation IDs propagated across modules | Unit | [ ] |
+| B003 | Logging/observability setup (structured logging, correlation IDs) | `backend/utils/logging*`, middleware | B001 | Structured logs, correlation IDs propagated across modules | Unit [x] |
 | B004 | Error handling middleware & typed errors | `backend/core/errors.py`, API middleware | B001 | Stable error shapes, no secret leakage, correct status codes | Unit/integration | [x] |
 | B005 | CORS/security headers/middleware as appropriate | `backend/core/middleware.py` (existing CORS) | B001 | Basic security middleware configured safely | Integration | [x] |
 
@@ -28,32 +28,32 @@
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
 | B009 | DB session management (engine, SessionLocal, dependency) | `backend/database/session.py`, `backend/database/connection.py` | B002 | Reusable sessions, context managed, testable | Unit | [x] |
-| B010 | ORM models for projects/experiments/runs/events/incidents/checkpoints/recovery/evals/artifacts | `backend/database/models*` | B006,B009 | Models match schemas, FKs, indexes where needed | Unit/integration | [ ] |
+| B010 | ORM models for projects/experiments/runs/events/incidents/checkpoints/recovery/evals/artifacts | `backend/database/models*` | B006,B009 | Models match schemas, FKs, indexes where needed | Unit/integration [x] |
 | B011 | Migrations (Alembic or equivalent) with versioned schema | `backend/database/migrations/` (alembic init d) | B010 | Up/down migrations exist, reproducible | Migration tests | [x] |
 | B012 | Repositories/services for persistence (not in route handlers) | `backend/provenance/service.py`, `backend/verification/tools/`, `backend/api/dependencies.py` (existing pattern) | B010 | CRUD + queries by IDs, transactions handled | Unit/integration | [x] |
-| B013 | Artifact registry fully integrated with real metadata/hashes | `backend/database/` (has ArtifactRegistry) | B010,B012 | Registry used by training/provenance, integrity tracked | Integration | [ ] |
+| B013 | Artifact registry fully integrated with real metadata/hashes | `backend/database/` (has ArtifactRegistry) | B010,B012 | Registry used by training/provenance, integrity tracked | Integration [x] |
 
 ## 4. Environments (Warehouse2D)
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B014 | Warehouse2DEnv Gymnasium env with validation | `backend/environments/warehouse_env.py` | B006 | Config validation per AGENTS.md, reachability, bounds, distinct start/goal | Unit (test_env_smoke exists) | [ ] |
-| B015 | Environment config models/fingerprints | `backend/environments/config.py`, `fingerprints.py` | B006 | Fingerprints stable, exclude transients, deterministic | Unit | [ ] |
-| B016 | Env registration/factory | `backend/environments/__init__.py` or factory | B014 | Clean API to create env by config/id | Unit | [ ] |
+| B014 | Warehouse2DEnv Gymnasium env with validation | `backend/environments/warehouse_env.py` | B006 | Config validation per AGENTS.md, reachability, bounds, distinct start/goal | Unit (test_env_smoke exists) [x] |
+| B015 | Environment config models/fingerprints | `backend/environments/config.py`, `fingerprints.py` | B006 | Fingerprints stable, exclude transients, deterministic | Unit [x] |
+| B016 | Env registration/factory | `backend/environments/__init__.py` or factory | B014 | Clean API to create env by config/id | Unit [x] |
 
 ## 5. Training, PPO, Lifecycle, Checkpoints
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B017 | PPO trainer wrapper (SB3) with validated config | `backend/training/ppo.py`, `training/ppo.py` | B014,B006 | Validates hyperparams, uses correct policy, seeds set | Unit/smoke (test_ppo_smoke exists) | [ ] |
-| B018 | Run lifecycle states/transitions (created→queued→starting→running→stop_requested→stopped, terminal) | `backend/training/*` lifecycle | B006,B012 | Illegal transitions rejected, idempotent stop, terminal immutable | Unit (test_lifecycle exists) | [ ] |
-| B019 | Training callbacks emitting canonical events/metrics | `backend/training/callbacks.py` | B007,B018 | Events have IDs, timestamps, run/episode context | Integration (test_events exists) | [ ] |
-| B020 | Checkpoint save/load with atomic writes + SHA-256 hash + metadata | `backend/training/*`, `backend/provenance/*` | B018,B013 | Atomic write (temp+rename), hash computed/stored, integrity verified | Unit (test_checkpoints exists) | [ ] |
+| B017 | PPO trainer wrapper (SB3) with validated config | `backend/training/ppo.py`, `training/ppo.py` | B014,B006 | Validates hyperparams, uses correct policy, seeds set | Unit/smoke (test_ppo_smoke exists) [x] |
+| B018 | Run lifecycle states/transitions (created→queued→starting→running→stop_requested→stopped, terminal) | `backend/training/*` lifecycle | B006,B012 | Illegal transitions rejected, idempotent stop, terminal immutable | Unit (test_lifecycle exists) [x] |
+| B019 | Training callbacks emitting canonical events/metrics | `backend/training/callbacks.py` | B007,B018 | Events have IDs, timestamps, run/episode context | Integration (test_events exists) [x] |
+| B020 | Checkpoint save/load with atomic writes + SHA-256 hash + metadata | `backend/training/*`, `backend/provenance/*` | B018,B013 | Atomic write (temp+rename), hash computed/stored, integrity verified | Unit (test_checkpoints exists) [x] |
 | B021 | Training worker/scheduler (non-blocking HTTP) | `backend/workers/training_worker.py`, `backend/api/routers/runs.py` | B018,B001 | API schedules work; worker executes; status updates persisted | Integration | [x] |
 
 ## 6. Monitoring, Metrics & Events
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
 | B022 | Episode/rollout metrics (raw + rolling aggregates) separated from eval | `backend/monitoring/models/episode.py`, `backend/monitoring/service.py` | B007,B019 | Explicit window/denom/missing-data rules, training vs eval separated | Unit | [x] |
-| B023 | Event store/publisher (durable, not only in-memory) | `backend/monitoring/events*` or persistence | B007,B012 | Events persisted, queryable by run/episode/timestep | Integration | [ ] |
+| B023 | Event store/publisher (durable, not only in-memory) | `backend/monitoring/events*` or persistence | B007,B012 | Events persisted, queryable by run/episode/timestep | Integration [x] |
 | B024 | Real-time updates channel (WS/SSE) with versioned schema + reconnect/resync | `backend/api/*` live channel | B023,B001 | Versioned messages, snapshot on reconnect, no lost critical events | Integration | [!] |
 
 ## 7. Fault Injection
@@ -112,7 +112,7 @@
 | B051 | Start/stop training APIs (idempotent, non-blocking) | `backend/api/routers/runs.py` | B021,B018,B050 | Schedule via worker, return run status, safe retries | Integration | [x] |
 | B052 | Intent/requirements + verification/incidents APIs | Verification routes + incident endpoints (existing) | B027-B031,B001 | Real evidence flow, incidents reference real IDs | Integration | [x] |
 | B053 | Diagnosis APIs (evidence package + structured result) | `backend/api/routers/diagnosis.py`, `backend/diagnosis/api.py` | B032-B036,B052 | Returns real diagnosis or explicit unavailable | Integration | [x] |
-| B054 | Full vertical slice API wiring (config→run→fault→detect→diagnose→recover→evaluate) | All APIs | B049-B053 | End-to-end callable via API with real data flow | E2E | [ ] |
+| B054 | Full vertical slice API wiring (config→run→fault→detect→diagnose→recover→evaluate) | All APIs | B049-B053 | End-to-end callable via API with real data flow | E2E [x] |
 
 ## 14. Security, Validation, Reliability
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
