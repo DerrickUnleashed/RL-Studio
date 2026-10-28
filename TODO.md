@@ -1,4 +1,4 @@
-**Completion:** 51/71 tasks completed (71.8%)
+**Completion:** 54/71 tasks completed (76.1%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -20,9 +20,9 @@
 ## 2. Shared Schemas, Contracts & Events
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B006 | Canonical shared schemas (Pydantic) for projects/experiments/runs/events/requirements/incidents/checkpoints/recovery/eval | `shared/schemas/` | - | All cross-module contracts in shared/, no duplication, versioned | Contract tests | [ ] |
-| B007 | Event schema + validation (run/episode/step/collision/checkpoint/metric) | `shared/events/`, `backend/monitoring/*` | B006 | Schema validation enforces required fields, timestamps UTC, ordering | Contract/unit | [ ] |
-| B008 | Requirement/incident/recovery/eval contracts | `shared/contracts/` or schemas | B006 | Contracts match AGENTS.md §7, enums/states explicit | Contract tests | [ ] |
+| B006 | Canonical shared schemas (Pydantic) for projects/experiments/runs/events/requirements/incidents/checkpoints/recovery/eval | `shared/schemas/` (existing) | - | All cross-module contracts in shared/, no duplication, versioned | Contract tests | [x] |
+| B007 | Event schema + validation (run/episode/step/collision/checkpoint/metric) | `shared/events/` (existing), `backend/monitoring/*` | B006 | Schema validation enforces required fields, timestamps UTC, ordering | Contract/unit | [x] |
+| B008 | Requirement/incident/recovery/eval contracts | `shared/schemas/contracts.py` (existing) | B006 | Contracts match AGENTS.md §7, enums/states explicit | Contract tests | [x] |
 
 ## 3. Database, Persistence & Migrations
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
