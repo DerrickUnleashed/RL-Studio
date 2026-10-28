@@ -54,7 +54,7 @@
 |---|------|---------------|--------------|---------------------|----------------|--------|
 | B022 | Episode/rollout metrics (raw + rolling aggregates) separated from eval | `backend/monitoring/models/episode.py`, `backend/monitoring/service.py` | B007,B019 | Explicit window/denom/missing-data rules, training vs eval separated | Unit | [x] |
 | B023 | Event store/publisher (durable, not only in-memory) | `backend/monitoring/events*` or persistence | B007,B012 | Events persisted, queryable by run/episode/timestep | Integration | [ ] |
-| B024 | Real-time updates channel (WS/SSE) with versioned schema + reconnect/resync | `backend/api/*` live channel | B023,B001 | Versioned messages, snapshot on reconnect, no lost critical events | Integration | [ ] |
+| B024 | Real-time updates channel (WS/SSE) with versioned schema + reconnect/resync | `backend/api/*` live channel | B023,B001 | Versioned messages, snapshot on reconnect, no lost critical events | Integration | [!] |
 
 ## 7. Fault Injection
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
