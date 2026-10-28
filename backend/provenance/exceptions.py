@@ -39,6 +39,14 @@ class UnsafeArtifactPathError(ArtifactPathError):
 
 class ProvenanceConflictError(ConflictError):
     error_code = "PROV-007"
+<<<<<<< HEAD
+
+
+class ProvenanceValidationError(ProvenanceError):
+    http_status = 422
+    error_code = "PROV-001"
+=======
+>>>>>>> main
 
 
 class ProvenanceValidationError(ProvenanceError):
