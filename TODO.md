@@ -1,4 +1,4 @@
-**Completion:** 13/71 tasks completed (18.3%)
+**Completion:** 23/71 tasks completed (32.4%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -65,20 +65,20 @@
 ## 8. Verification, Incidents & Deterministic Checks
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B027 | Developer-confirmed requirements model + storage | `backend/verification/models.py`, persistence | B006,B012 | Requirements have source/confirmation/tolerance/scope/version | Unit | [ ] |
-| B028 | Deterministic check tools (reward/metric/episode/event/config) | `backend/verification/tools/*` | B027,B023 | Evidence-based comparison, no guessing expected values | Unit (tools exist) | [ ] |
-| B029 | Verification engine/agent enforcing "LLM cannot upgrade FAIL" | `backend/verification/agent/*` | B028 | Deterministic authority enforced, aggregation correct | Unit | [ ] |
-| B030 | Incident creation/classification/deduplication from violations | `backend/verification/*` incidents | B029,B023 | Incidents reference real event IDs, env version, requirement IDs | Integration | [ ] |
-| B031 | Evidence packaging for diagnosis | `backend/verification/*` evidence | B030,B023 | Frozen evidence with stable IDs/timestamps/context | Unit/integration | [ ] |
+| B027 | Developer-confirmed requirements model + storage | `backend/verification/models.py` (existing) | B006,B012 | Requirements have source/confirmation/tolerance/scope/version | Unit | [x] |
+| B028 | Deterministic check tools (reward/metric/episode/event/config) | `backend/verification/tools/*` (existing) | B027,B023 | Evidence-based comparison, no guessing expected values | Unit | [x] |
+| B029 | Verification engine/agent enforcing "LLM cannot upgrade FAIL" | `backend/verification/agent/*` (existing) | B028 | Deterministic authority enforced, aggregation correct | Unit | [x] |
+| B030 | Incident creation/classification/deduplication from violations | `backend/verification/*` incidents (existing) | B029,B023 | Incidents reference real event IDs, env version, requirement IDs | Integration | [x] |
+| B031 | Evidence packaging for diagnosis | `backend/verification/*` evidence (existing) | B030,B023 | Frozen evidence with stable IDs/timestamps/context | Unit/integration | [x] |
 
 ## 9. Diagnosis / Meta AI (Advisory)
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B032 | Replaceable Meta AI provider interface | `backend/diagnosis/*`, `backend/verification/llm/*` | B031,B006 | Interface abstract, swappable impls, no hardcoded provider lock-in | Unit | [ ] |
-| B033 | Prompting restricted to evidence, no secrets | `backend/verification/llm/prompts.py` | B032,B031 | Prompts use only evidence package, strip sensitive data | Unit | [ ] |
-| B034 | Structured output validation + guardrails | `backend/verification/llm/response_parser.py`, `llm_guardrails.py` | B032 | Schema-validated JSON, timeouts/retries/backoff/jitter, refusal handling | Unit | [ ] |
-| B035 | Confidence labeling & hypothesis/fact separation | `backend/verification/llm/*` | B034 | No uncalibrated confidence unless provided+labelled; facts vs hypotheses distinguished | Unit | [ ] |
-| B036 | UI/provider-unavailable path handled explicitly | API + service | B032 | Clear "provider unavailable/unconfigured" response, no fabricated diagnosis | Integration | [ ] |
+| B032 | Replaceable Meta AI provider interface | `backend/diagnosis/*`, `backend/verification/llm/*` (existing) | B031,B006 | Interface abstract, swappable impls, no hardcoded provider lock-in | Unit | [x] |
+| B033 | Prompting restricted to evidence, no secrets | `backend/verification/llm/prompts.py` (existing) | B032,B031 | Prompts use only evidence package, strip sensitive data | Unit | [x] |
+| B034 | Structured output validation + guardrails | `backend/verification/llm/response_parser.py`, `llm_guardrails.py` (existing) | B032 | Schema-validated JSON, timeouts/retries/backoff/jitter, refusal handling | Unit | [x] |
+| B035 | Confidence labeling & hypothesis/fact separation | `backend/verification/llm/*` (existing) | B034 | No uncalibrated confidence unless provided+labelled; facts vs hypotheses distinguished | Unit | [x] |
+| B036 | UI/provider-unavailable path handled explicitly | `backend/api/routers/diagnosis.py` (existing) | B032 | Clear "provider unavailable/unconfigured" response, no fabricated diagnosis | Integration | [x] |
 
 ## 10. Provenance, Artifacts, Lineage
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
