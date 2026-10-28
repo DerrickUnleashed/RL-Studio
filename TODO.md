@@ -1,4 +1,4 @@
-**Completion:** 9/71 tasks completed (12.7%)
+**Completion:** 13/71 tasks completed (18.3%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -15,7 +15,7 @@
 | B002 | Central configuration (env, paths, defaults, validation) | `backend/core/config.py` | - | All required env vars defined, validated, secrets not logged | Unit | [x] |
 | B003 | Logging/observability setup (structured logging, correlation IDs) | `backend/utils/logging*`, middleware | B001 | Structured logs, correlation IDs propagated across modules | Unit | [ ] |
 | B004 | Error handling middleware & typed errors | `backend/core/errors.py`, API middleware | B001 | Stable error shapes, no secret leakage, correct status codes | Unit/integration | [x] |
-| B005 | CORS/security headers/middleware as appropriate | Middleware | B001 | Basic security middleware configured safely | Integration | [ ] |
+| B005 | CORS/security headers/middleware as appropriate | `backend/core/middleware.py` (existing CORS) | B001 | Basic security middleware configured safely | Integration | [x] |
 
 ## 2. Shared Schemas, Contracts & Events
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
@@ -52,15 +52,15 @@
 ## 6. Monitoring, Metrics & Events
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B022 | Episode/rollout metrics (raw + rolling aggregates) separated from eval | `backend/monitoring/*` | B007,B019 | Explicit window/denom/missing-data rules, training vs eval separated | Unit (test_metrics exists) | [ ] |
+| B022 | Episode/rollout metrics (raw + rolling aggregates) separated from eval | `backend/monitoring/models/episode.py`, `backend/monitoring/service.py` | B007,B019 | Explicit window/denom/missing-data rules, training vs eval separated | Unit | [x] |
 | B023 | Event store/publisher (durable, not only in-memory) | `backend/monitoring/events*` or persistence | B007,B012 | Events persisted, queryable by run/episode/timestep | Integration | [ ] |
 | B024 | Real-time updates channel (WS/SSE) with versioned schema + reconnect/resync | `backend/api/*` live channel | B023,B001 | Versioned messages, snapshot on reconnect, no lost critical events | Integration | [ ] |
 
 ## 7. Fault Injection
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B025 | Allow-listed faults (reward scaling, obs corruption, invalid termination) with params | `backend/fault_injection/*` | B014,B006 | Only allow-listed, validated params, trigger boundaries exact | Unit (test_faults exists) | [ ] |
-| B026 | Fault schedule/applied state isolated per run, no cross-run leakage | `backend/fault_injection/*` | B025,B018 | Applied only in targeted run/env, state cleaned up | Integration | [ ] |
+| B025 | Allow-listed faults (reward scaling, obs corruption, invalid termination) with params | `backend/fault_injection/*` (existing) | B014,B006 | Only allow-listed, validated params, trigger boundaries exact | Unit (test_faults exists) | [x] |
+| B026 | Fault schedule/applied state isolated per run, no cross-run leakage | `backend/fault_injection/*` (existing) | B025,B018 | Applied only in targeted run/env, state cleaned up | Integration | [x] |
 
 ## 8. Verification, Incidents & Deterministic Checks
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
