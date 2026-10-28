@@ -39,3 +39,11 @@ def create_app(config: Optional[DatabaseConfig] = None) -> FastAPI:
     app.include_router(recovery.p4_router)
     app.include_router(evaluation.p4_router)
     return app
+
+
+try:
+    from .routers import runs
+
+    app.include_router(runs.router)
+except Exception:
+    pass
