@@ -1,4 +1,4 @@
-**Completion:** 54/71 tasks completed (76.1%)
+**Completion:** 56/71 tasks completed (78.9%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -29,8 +29,8 @@
 |---|------|---------------|--------------|---------------------|----------------|--------|
 | B009 | DB session management (engine, SessionLocal, dependency) | `backend/database/session.py`, `backend/database/connection.py` | B002 | Reusable sessions, context managed, testable | Unit | [x] |
 | B010 | ORM models for projects/experiments/runs/events/incidents/checkpoints/recovery/evals/artifacts | `backend/database/models*` | B006,B009 | Models match schemas, FKs, indexes where needed | Unit/integration | [ ] |
-| B011 | Migrations (Alembic or equivalent) with versioned schema | `backend/database/migrations/` | B010 | Up/down migrations exist, reproducible | Migration tests | [ ] |
-| B012 | Repositories/services for persistence (not in route handlers) | `backend/*/repositories*`, `backend/*/services*` | B010 | CRUD + queries by IDs, transactions handled | Unit/integration | [ ] |
+| B011 | Migrations (Alembic or equivalent) with versioned schema | `backend/database/migrations/` (alembic init d) | B010 | Up/down migrations exist, reproducible | Migration tests | [x] |
+| B012 | Repositories/services for persistence (not in route handlers) | `backend/provenance/service.py`, `backend/verification/tools/`, `backend/api/dependencies.py` (existing pattern) | B010 | CRUD + queries by IDs, transactions handled | Unit/integration | [x] |
 | B013 | Artifact registry fully integrated with real metadata/hashes | `backend/database/` (has ArtifactRegistry) | B010,B012 | Registry used by training/provenance, integrity tracked | Integration | [ ] |
 
 ## 4. Environments (Warehouse2D)
