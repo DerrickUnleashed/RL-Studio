@@ -1,6 +1,6 @@
 # Backend Implementation TODO - Self-Healing RL Studio
 
-**Branch:** dev3  
+**Branch:** derrick  
 **Goal:** Every backend feature 100% implemented and verified against acceptance criteria  
 **Status Convention:** `[ ]` Not implemented/unverified | `[x]` Fully implemented and verified | `[!]` Blocked
 
@@ -137,6 +137,6 @@
 ---
 
 ## Audit Notes
-- Current branch: dev3 (switched from main per git rules)
+- Current branch: derrick (switched from main per git rules)
 - Existing: env/training/monitoring/fault_injection/verification/diagnosis/provenance/recovery/evaluation partially present; DB has ArtifactRegistry; API has verification + 3 routers (evaluation/provenance/recovery); tests present in backend/tests/
 - Missing likely: FastAPI app entrypoint/main, full DB models/migrations/session, API app composition mounting all routers, worker/scheduler, durable event store integration, full recovery/eval wiring, projects/runs CRUD, diagnosis API wiring, E2E tests
