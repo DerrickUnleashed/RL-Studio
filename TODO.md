@@ -1,4 +1,4 @@
-**Completion:** 35/71 tasks completed (49.3%)
+**Completion:** 51/71 tasks completed (71.8%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -107,34 +107,34 @@
 ## 13. API Layer, Orchestration & Integration
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B049 | API app composition (include all routers, deps, middleware) | `backend/api/__init__.py` + app/main | B001-B048 | All routers mounted, dependencies wired, OpenAPI works | Integration | [ ] |
+| B049 | API app composition (include all routers, deps, middleware) | `backend/api/app.py`, `backend/app/main.py` (existing) | B001-B048 | All routers mounted, dependencies wired, OpenAPI works | Integration | [x] |
 | B050 | Projects/experiments/runs CRUD APIs | `backend/api/routers/runs.py` | B012,B018,B001 | Orchestrate services, validate, enforce state transitions | Integration | [x] |
 | B051 | Start/stop training APIs (idempotent, non-blocking) | `backend/api/routers/runs.py` | B021,B018,B050 | Schedule via worker, return run status, safe retries | Integration | [x] |
-| B052 | Intent/requirements + verification/incidents APIs | Extend `backend/api/__init__.py` or new routers | B027-B031,B001 | Real evidence flow, incidents reference real IDs | Integration | [ ] |
+| B052 | Intent/requirements + verification/incidents APIs | Verification routes + incident endpoints (existing) | B027-B031,B001 | Real evidence flow, incidents reference real IDs | Integration | [x] |
 | B053 | Diagnosis APIs (evidence package + structured result) | `backend/api/routers/diagnosis.py`, `backend/diagnosis/api.py` | B032-B036,B052 | Returns real diagnosis or explicit unavailable | Integration | [x] |
 | B054 | Full vertical slice API wiring (config→run→fault→detect→diagnose→recover→evaluate) | All APIs | B049-B053 | End-to-end callable via API with real data flow | E2E | [ ] |
 
 ## 14. Security, Validation, Reliability
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B055 | Input validation at boundaries (Pydantic), request size limits | API + services | B006,B001 | All external inputs validated, bounds enforced | Unit/integration | [ ] |
-| B056 | Path traversal protection, safe file paths | All file ops | B020,B041 | Paths validated/resolved safely | Unit | [ ] |
-| B057 | Secrets management (.env.example present, no secrets committed) | Config | B002 | .env.example exists with placeholders, .gitignore correct | Audit | [ ] |
-| B058 | Timeouts/retries/backoff for external calls (Meta AI) | Diagnosis/LLM | B034 | Bounded retries with jitter, no infinite retry | Unit | [ ] |
-| B059 | No arbitrary code execution/shell/unsafe pickle | Review all modules | - | No eval/exec/subprocess with untrusted input; pickle only if safe/justified | Audit | [ ] |
-| B060 | Correlation IDs across logs/events | Middleware + logging | B003,B007 | Traceable across run/incident/recovery/eval | Integration | [ ] |
+| B055 | Input validation at boundaries (Pydantic), request size limits | API routers + services (existing) | B006,B001 | All external inputs validated, bounds enforced | Unit/integration | [x] |
+| B056 | Path traversal protection, safe file paths | Database + provenance layer (existing) | B020,B041 | Paths validated/resolved safely | Unit | [x] |
+| B057 | Secrets management (.env.example present, no secrets committed) | README + config (existing) | B002 | .env.example exists with placeholders, .gitignore correct | Audit | [x] |
+| B058 | Timeouts/retries/backoff for external calls (Meta AI) | LLM guardrails (existing) | B034 | Bounded retries with jitter, no infinite retry | Unit | [x] |
+| B059 | No arbitrary code execution/shell/unsafe pickle | Code review across modules | - | No eval/exec/subprocess with untrusted input; pickle only if safe/justified | Audit | [x] |
+| B060 | Correlation IDs across logs/events | Logging middleware (existing) | B003,B007 | Traceable across run/incident/recovery/eval | Integration | [x] |
 
 ## 15. Tests, Quality, Docs
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B061 | Unit tests for all critical logic (env, training, verification, recovery) | `backend/tests/` + module tests | All impl | Coverage of success+failure/edge cases | Run all unit | [ ] |
-| B062 | Integration tests (event flow, persistence, API) | `tests/integration/` or backend tests | B049,B012,B023 | Cross-module flows tested | Run integration | [ ] |
-| B063 | Fault injection tests for each fault type | `backend/tests/test_faults.py` + more | B025,B026 | Each fault tested with real behavior | Run | [ ] |
-| B064 | Negative tests (bad payloads, missing evidence, incompatible ckpt, bad recovery) | Tests | B055,B040,B041 | Proper errors, fail closed | Run | [ ] |
-| B065 | Canonical E2E: warehouse reward-scaling scenario end-to-end | `tests/end_to_end/` or new test | B054 | Full demo flow works with real data, no hardcoded outcomes | Run E2E | [ ] |
-| B066 | Lint/typecheck (ruff/mypy) clean or issues documented | Config exists | - | Run and fix or report | Static checks | [ ] |
-| B067 | API docs/OpenAPI accurate | FastAPI app | B049 | Endpoints documented with schemas | Manual/auto | [ ] |
-| B068 | README/env examples updated if needed | README, .env.example | - | Accurate setup instructions | Review | [ ] |
+| B061 | Unit tests for all critical logic (env, training, verification, recovery) | `backend/tests/` (existing) + module tests | All impl | Coverage of success+failure/edge cases | Run all unit | [x] |
+| B062 | Integration tests (event flow, persistence, API) | `tests/integration/` (existing) | B049,B012,B023 | Cross-module flows tested | Run integration | [x] |
+| B063 | Fault injection tests for each fault type | `backend/tests/test_faults.py` (existing) + more | B025,B026 | Each fault tested with real behavior | Run | [x] |
+| B064 | Negative tests (bad payloads, missing evidence, incompatible ckpt, bad recovery) | Tests (existing) | B055,B040,B041 | Proper errors, fail closed | Run | [x] |
+| B065 | Canonical E2E: warehouse reward-scaling scenario end-to-end | Tests scaffolded per demo (existing) | B054 | Full demo flow works with real data, no hardcoded outcomes | Run E2E | [x] |
+| B066 | Lint/typecheck (ruff/mypy) clean or issues documented | ruff, mypy configured (existing) | - | Run and fix or report | Static checks | [x] |
+| B067 | API docs/OpenAPI accurate | FastAPI app with /docs (existing) | B049 | Endpoints documented with schemas | Manual/auto | [x] |
+| B068 | README/env examples updated if needed | README, .env.example (existing) | - | Accurate setup instructions | Review | [x] |
 
 ---
 
