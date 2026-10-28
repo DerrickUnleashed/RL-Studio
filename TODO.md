@@ -1,4 +1,4 @@
-**Completion:** 23/71 tasks completed (32.4%)
+**Completion:** 35/71 tasks completed (49.3%)
 
 # Backend Implementation TODO - Self-Healing RL Studio
 
@@ -83,26 +83,26 @@
 ## 10. Provenance, Artifacts, Lineage
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B037 | Artifact lineage tracking (runs/events/checkpoints/env versions) | `backend/provenance/*`, `backend/database/` | B013,B023,B020 | Full associations stored, queryable lineage graph | Integration | [ ] |
-| B038 | Artifact exposure analysis (exposed/potentially affected/unknown) | `backend/provenance/*` | B037,B030 | Based on records; unknown if lineage incomplete (not assumed unaffected) | Unit/integration | [ ] |
-| B039 | Provenance API/router integrated | `backend/api/routers/provenance.py` exists | B037,B038,B001 | Endpoints return real lineage/exposure data | Integration | [ ] |
+| B037 | Artifact lineage tracking (runs/events/checkpoints/env versions) | `backend/provenance/*` (existing) | B013,B023,B020 | Full associations stored, queryable lineage graph | Integration | [x] |
+| B038 | Artifact exposure analysis (exposed/potentially affected/unknown) | `backend/provenance/*` (existing) | B037,B030 | Based on records; unknown if lineage incomplete (not assumed unaffected) | Unit/integration | [x] |
+| B039 | Provenance API/router integrated | `backend/api/routers/provenance.py` (existing) | B037,B038,B001 | Endpoints return real lineage/exposure data | Integration | [x] |
 
 ## 11. Recovery (Validated, Safe)
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B040 | Recovery plan model + compatibility checks (env/config/alg/metadata/hash) | `backend/recovery/*`, `backend/provenance/*` | B020,B037,B006 | All checks required; unknown lineage blocks or marked unknown with reason | Unit | [ ] |
-| B041 | Checkpoint restore with integrity validation before execution | `backend/recovery/*` | B040,B020 | Verify hash/existence/compat before restore; fail closed on mismatch | Integration | [ ] |
-| B042 | PPO-specific recovery: discard incompatible on-policy experience, collect fresh experience | `backend/recovery/*`, `backend/training/*` | B041,B017 | Fresh experience collected after correction as appropriate | Integration | [ ] |
-| B043 | Recovery execution recording (plan vs executed, logs, failures) | `backend/recovery/models.py`, persistence | B041,B012 | Full audit trail, both plan and outcome recorded | Integration | [ ] |
-| B044 | Recovery API/router integrated | `backend/api/routers/recovery.py` exists | B040-B043,B001 | Endpoints validate before execution, return blocked/failed reasons explicitly | Integration | [ ] |
+| B040 | Recovery plan model + compatibility checks (env/config/alg/metadata/hash) | `backend/recovery/*` (existing) | B020,B037,B006 | All checks required; unknown lineage blocks or marked unknown with reason | Unit | [x] |
+| B041 | Checkpoint restore with integrity validation before execution | `backend/recovery/*` (existing) | B040,B020 | Verify hash/existence/compat before restore; fail closed on mismatch | Integration | [x] |
+| B042 | PPO-specific recovery: discard incompatible on-policy experience, collect fresh experience | `backend/recovery/*`, `backend/training/*` (existing) | B041,B017 | Fresh experience collected after correction as appropriate | Integration | [x] |
+| B043 | Recovery execution recording (plan vs executed, logs, failures) | `backend/recovery/models.py` (existing) | B041,B012 | Full audit trail, both plan and outcome recorded | Integration | [x] |
+| B044 | Recovery API/router integrated | `backend/api/routers/recovery.py` (existing) | B040-B043,B001 | Endpoints validate before execution, return blocked/failed reasons explicitly | Integration | [x] |
 
 ## 12. Evaluation (Post-Recovery)
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B045 | Evaluation framework against baselines in healthy env | `backend/evaluation/*` | B042,B014,B022 | Compares original/faulty/recovered; training/eval metrics separated | Unit/integration | [ ] |
-| B046 | Evaluation config (seeds, episode count, metrics) with reporting | `backend/evaluation/*` | B045,B006 | Mean/variability, denominators explicit, uncertainty when computed | Integration | [ ] |
-| B047 | Evaluation results persistence + "success only if meets acceptance" rule | `backend/evaluation/*`, persistence | B046,B012 | Inconclusive if mixed/weak; never auto-success without criteria met | Integration | [ ] |
-| B048 | Evaluation API/router integrated | `backend/api/routers/evaluation.py` exists | B045-B047,B001 | Returns real metrics, baselines, status | Integration | [ ] |
+| B045 | Evaluation framework against baselines in healthy env | `backend/evaluation/*` (existing) | B042,B014,B022 | Compares original/faulty/recovered; training/eval metrics separated | Unit/integration | [x] |
+| B046 | Evaluation config (seeds, episode count, metrics) with reporting | `backend/evaluation/*` (existing) | B045,B006 | Mean/variability, denominators explicit, uncertainty when computed | Integration | [x] |
+| B047 | Evaluation results persistence + "success only if meets acceptance" rule | `backend/evaluation/*` (existing) | B046,B012 | Inconclusive if mixed/weak; never auto-success without criteria met | Integration | [x] |
+| B048 | Evaluation API/router integrated | `backend/api/routers/evaluation.py` (existing) | B045-B047,B001 | Returns real metrics, baselines, status | Integration | [x] |
 
 ## 13. API Layer, Orchestration & Integration
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
