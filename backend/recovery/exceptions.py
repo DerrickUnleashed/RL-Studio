@@ -26,6 +26,14 @@ class RecoveryBlockedError(BlockedOperationError):
 
 class RecoveryConflictError(ConflictError):
     error_code = "RECOV-004"
+<<<<<<< HEAD
+
+
+class RecoveryValidationError(RecoveryError):
+    http_status = 422
+    error_code = "REC-001"
+=======
+>>>>>>> main
 
 
 class RecoveryValidationError(RecoveryError):

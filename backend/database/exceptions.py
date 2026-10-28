@@ -1,4 +1,9 @@
-"""Stable Person 4 exception vocabulary."""
+"""Stable Person 4 exception vocabulary.
+
+Every exception carries a machine-readable ``error_code``, an HTTP status for
+the API boundary, a safe message, and optional structured details.  Internal
+diagnostics and secrets must not be placed in ``message``.
+"""
 
 from __future__ import annotations
 

@@ -127,6 +127,7 @@ def get_incident_impact(
 
 
 router.include_router(p4_router)
+<<<<<<< HEAD
 
 
 # Register Person 4 routes on a router that can be combined
@@ -154,3 +155,5 @@ async def get_artifact(artifact_id: str, services: Services = Depends(get_servic
 async def get_incident_impact(incident_id: str, services: Services = Depends(get_services)):
     impact = services.provenance.analyze_impact(incident_id)
     return impact.model_dump(mode="json")
+=======
+>>>>>>> main
