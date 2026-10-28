@@ -9,10 +9,10 @@
 ## 1. Backend Foundation, Config & Startup
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B001 | Application entrypoint (FastAPI/ASGI) for serving API | `backend/` (missing app/main) | B002 | App boots, router wiring works, health endpoint exists | Unit + integration | [ ] |
-| B002 | Central configuration (env, paths, defaults, validation) | `backend/config*` (check) | - | All required env vars defined, validated, secrets not logged | Unit | [ ] |
+| B001 | Application entrypoint (FastAPI/ASGI) for serving API | `backend/app/main.py`, `backend/api/app.py` | B002 | App boots, router wiring works, health endpoint exists | Unit + integration | [x] |
+| B002 | Central configuration (env, paths, defaults, validation) | `backend/core/config.py` | - | All required env vars defined, validated, secrets not logged | Unit | [x] |
 | B003 | Logging/observability setup (structured logging, correlation IDs) | `backend/utils/logging*`, middleware | B001 | Structured logs, correlation IDs propagated across modules | Unit | [ ] |
-| B004 | Error handling middleware & typed errors | `backend/utils/errors*`, middleware | B001 | Stable error shapes, no secret leakage, correct status codes | Unit/integration | [ ] |
+| B004 | Error handling middleware & typed errors | `backend/core/errors.py`, API middleware | B001 | Stable error shapes, no secret leakage, correct status codes | Unit/integration | [x] |
 | B005 | CORS/security headers/middleware as appropriate | Middleware | B001 | Basic security middleware configured safely | Integration | [ ] |
 
 ## 2. Shared Schemas, Contracts & Events
@@ -25,7 +25,7 @@
 ## 3. Database, Persistence & Migrations
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
-| B009 | DB session management (engine, SessionLocal, dependency) | `backend/database/` | B002 | Reusable sessions, context managed, testable | Unit | [ ] |
+| B009 | DB session management (engine, SessionLocal, dependency) | `backend/database/session.py`, `backend/database/connection.py` | B002 | Reusable sessions, context managed, testable | Unit | [x] |
 | B010 | ORM models for projects/experiments/runs/events/incidents/checkpoints/recovery/evals/artifacts | `backend/database/models*` | B006,B009 | Models match schemas, FKs, indexes where needed | Unit/integration | [ ] |
 | B011 | Migrations (Alembic or equivalent) with versioned schema | `backend/database/migrations/` | B010 | Up/down migrations exist, reproducible | Migration tests | [ ] |
 | B012 | Repositories/services for persistence (not in route handlers) | `backend/*/repositories*`, `backend/*/services*` | B010 | CRUD + queries by IDs, transactions handled | Unit/integration | [ ] |
@@ -45,7 +45,7 @@
 | B018 | Run lifecycle states/transitions (created→queued→starting→running→stop_requested→stopped, terminal) | `backend/training/*` lifecycle | B006,B012 | Illegal transitions rejected, idempotent stop, terminal immutable | Unit (test_lifecycle exists) | [ ] |
 | B019 | Training callbacks emitting canonical events/metrics | `backend/training/callbacks.py` | B007,B018 | Events have IDs, timestamps, run/episode context | Integration (test_events exists) | [ ] |
 | B020 | Checkpoint save/load with atomic writes + SHA-256 hash + metadata | `backend/training/*`, `backend/provenance/*` | B018,B013 | Atomic write (temp+rename), hash computed/stored, integrity verified | Unit (test_checkpoints exists) | [ ] |
-| B021 | Training worker/scheduler (non-blocking HTTP) | `backend/training/worker*` or API orchestration | B018,B001 | API schedules work; worker executes; status updates persisted | Integration | [ ] |
+| B021 | Training worker/scheduler (non-blocking HTTP) | `backend/workers/training_worker.py`, `backend/api/routers/runs.py` | B018,B001 | API schedules work; worker executes; status updates persisted | Integration | [x] |
 
 ## 6. Monitoring, Metrics & Events
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
@@ -106,10 +106,10 @@
 | ID | Task | Modules/Files | Dependencies | Acceptance Criteria | Tests Required | Status |
 |---|------|---------------|--------------|---------------------|----------------|--------|
 | B049 | API app composition (include all routers, deps, middleware) | `backend/api/__init__.py` + app/main | B001-B048 | All routers mounted, dependencies wired, OpenAPI works | Integration | [ ] |
-| B050 | Projects/experiments/runs CRUD APIs | `backend/api/routers/*` (add if missing) | B012,B018,B001 | Orchestrate services, validate, enforce state transitions | Integration | [ ] |
-| B051 | Start/stop training APIs (idempotent, non-blocking) | API routers | B021,B018,B050 | Schedule via worker, return run status, safe retries | Integration | [ ] |
+| B050 | Projects/experiments/runs CRUD APIs | `backend/api/routers/runs.py` | B012,B018,B001 | Orchestrate services, validate, enforce state transitions | Integration | [x] |
+| B051 | Start/stop training APIs (idempotent, non-blocking) | `backend/api/routers/runs.py` | B021,B018,B050 | Schedule via worker, return run status, safe retries | Integration | [x] |
 | B052 | Intent/requirements + verification/incidents APIs | Extend `backend/api/__init__.py` or new routers | B027-B031,B001 | Real evidence flow, incidents reference real IDs | Integration | [ ] |
-| B053 | Diagnosis APIs (evidence package + structured result) | API | B032-B036,B052 | Returns real diagnosis or explicit unavailable | Integration | [ ] |
+| B053 | Diagnosis APIs (evidence package + structured result) | `backend/api/routers/diagnosis.py`, `backend/diagnosis/api.py` | B032-B036,B052 | Returns real diagnosis or explicit unavailable | Integration | [x] |
 | B054 | Full vertical slice API wiring (config→run→fault→detect→diagnose→recover→evaluate) | All APIs | B049-B053 | End-to-end callable via API with real data flow | E2E | [ ] |
 
 ## 14. Security, Validation, Reliability
