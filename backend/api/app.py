@@ -47,3 +47,11 @@ try:
     app.include_router(runs.router)
 except Exception:
     pass
+
+
+# Real-time updates channel (WebSocket + SSE)
+try:
+    from .routers.ws_events import router as ws_router
+    app.include_router(ws_router)
+except Exception:
+    pass
