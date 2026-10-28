@@ -127,3 +127,30 @@ def get_incident_impact(
 
 
 router.include_router(p4_router)
+
+
+# Register Person 4 routes on a router that can be combined
+router.include_router(p4_router)
+
+
+@p4_router.get("/runs/{run_id}/provenance")
+async def get_run_provenance(run_id: str, services: Services = Depends(get_services)):
+    trace = services.provenance.get_trace(run_id)
+    return trace.model_dump(mode="json")
+
+
+@p4_router.get("/runs/{run_id}/artifacts")
+async def list_run_artifacts(run_id: str, services: Services = Depends(get_services)):
+    return {"artifacts": [a.model_dump(mode="json") for a in services.provenance.list_artifacts(run_id)]}
+
+
+@p4_router.get("/artifacts/{artifact_id}")
+async def get_artifact(artifact_id: str, services: Services = Depends(get_services)):
+    artifact = services.provenance.get_artifact(artifact_id)
+    return artifact.model_dump(mode="json")
+
+
+@p4_router.get("/incidents/{incident_id}/impact")
+async def get_incident_impact(incident_id: str, services: Services = Depends(get_services)):
+    impact = services.provenance.analyze_impact(incident_id)
+    return impact.model_dump(mode="json")

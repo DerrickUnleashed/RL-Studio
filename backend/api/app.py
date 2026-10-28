@@ -35,7 +35,8 @@ def create_app(config: Optional[DatabaseConfig] = None) -> FastAPI:
         lifespan=lifespan,
     )
     install_error_handlers(app)
-    app.include_router(provenance.router)
-    app.include_router(recovery.router)
-    app.include_router(evaluation.router)
+    # Include only Person 4 API routes as expected by tests
+    app.include_router(provenance.p4_router)
+    app.include_router(recovery.p4_router)
+    app.include_router(evaluation.p4_router)
     return app
