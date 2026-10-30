@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 """Validate shared schemas are importable and consistent."""
 import sys
+
 sys.path.insert(0, '.')
 
-from datetime import datetime, timezone
 from shared.schemas import (
-    Incident,
-    Recovery,
-    Evaluation,
-    Requirement,
-    EpisodeStartedEvent,
-    RewardObservedEvent,
-    EpisodeEndedEvent,
-    SourceComponent,
     SCHEMA_VERSION,
+    EpisodeEndedEvent,
+    EpisodeStartedEvent,
+    Incident,
+    Requirement,
+    RewardObservedEvent,
+    SourceComponent,
     new_uuid,
 )
-from shared.schemas.contracts import RecoveryStatus, IncidentStatus
 from shared.schemas.requirements import RequirementSource, RequirementType
 
 # Basic instantiation tests

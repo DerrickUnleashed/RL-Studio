@@ -7,23 +7,18 @@ See ``backend/verification/tools/`` for the package README and integration notes
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from backend.verification.models import (
     VerificationCheckResult,
     VerificationRequirement,
-    CheckStatus,
-    RequirementType,
-    EvidenceReference,
-    MetricObservation,
 )
-from backend.verification.exceptions import InputValidationError, EvidenceUnavailableError
 
 
 def _extract_reward_value(
-    source: Optional[Dict[str, Any]],
+    source: dict[str, Any] | None,
     key: str = "reward",
-) -> Optional[float]:
+) -> float | None:
     """Extract a numeric reward value from a dict-like source.
 
     Returns None if the key is absent, the value is not numeric, or source is
@@ -38,9 +33,9 @@ def _extract_reward_value(
 
 
 def _extract_episode_return(
-    source: Optional[Dict[str, Any]],
+    source: dict[str, Any] | None,
     key: str = "episode_return",
-) -> Optional[float]:
+) -> float | None:
     """Extract an episode return (accumulated reward) from a dict-like source.
 
     Returns None if the key is absent or the value is not numeric.
@@ -53,9 +48,9 @@ def _extract_episode_return(
     return None
 
 
-def _make_details(note: str, source: Optional[str] = None) -> Dict[str, Any]:
+def _make_details(note: str, source: str | None = None) -> dict[str, Any]:
     """Create a details dict compatible with VerificationCheckResult."""
-    d: Dict[str, Any] = {"note": note}
+    d: dict[str, Any] = {"note": note}
     if source is not None:
         d["source"] = source
     return d
@@ -65,9 +60,9 @@ def execute_check(
     check_id: str,
     requirement: VerificationRequirement,
     *,
-    configured_reward: Optional[float] = None,
-    observed_reward: Optional[float] = None,
-    episode_data: Optional[Dict[str, Any]] = None,
+    configured_reward: float | None = None,
+    observed_reward: float | None = None,
+    episode_data: dict[str, Any] | None = None,
     source: str = "reward_check",
 ) -> VerificationCheckResult:
     """Execute a reward requirement verification check.
@@ -92,23 +87,13 @@ def execute_check(
     """
     expected = requirement.expected_value
     actual = None
-    evidence_parts: List[str] = []
+    evidence_parts: list[str] = []
 
     # Determine what evidence is available and what to compare
-    if configured_reward is not None and observed_reward is None:
-        # Only configured reward available
-        actual = configured_reward
-        evidence_parts.append("configured_reward")
-    elif observed_reward is not None and configured_reward is None:
-        # Only observed reward available
-        actual = observed_reward
-        evidence_parts.append("observed_reward")
-    elif configured_reward is not None and observed_reward is not None:
-        # Both available — compare them
-        actual = observed_reward
-        evidence_parts.extend(["configured_reward", "observed_reward"])
-    else:
-        # Neither available
+    # Critical: if there is no observed reward (from actual execution evidence),
+    # we must NOT fabricate or default to the configured value.  Return UNKNOWN.
+    if observed_reward is None:
+        # No actual observed reward — cannot compare; return UNKNOWN
         from backend.verification.models import VerificationCheckResult
 
         return VerificationCheckResult(
@@ -118,7 +103,30 @@ def execute_check(
             actual=None,
             tolerance=None,
             evidence_refs=[],
-            details={"note": "Neither configured nor observed reward value is available", "source": source},
+            details={"note": "No observed reward available from execution evidence; cannot compare", "source": source},
+        )
+
+    if configured_reward is None:
+        # Only observed reward available; use it as actual
+        actual = observed_reward
+        evidence_parts.append("observed_reward")
+    elif observed_reward is not None and configured_reward is not None:
+        # Both available — compare them
+        actual = observed_reward
+        evidence_parts.extend(["configured_reward", "observed_reward"])
+    else:
+        # Should not reach here (observed_reward is not None handled above),
+        # but be safe.
+        from backend.verification.models import VerificationCheckResult
+
+        return VerificationCheckResult(
+            requirement_id=requirement.id,
+            status="unknown",
+            expected=expected,
+            actual=None,
+            tolerance=None,
+            evidence_refs=[],
+            details={"note": "Unexpected evidence state", "source": source},
         )
 
     expected_num = float(expected) if expected is not None else None
@@ -187,8 +195,8 @@ def _compare_reward_numeric(
     expected: float,
     actual: float,
     operator: str,
-    tolerance: Optional[float],
-) -> Dict[str, str]:
+    tolerance: float | None,
+) -> dict[str, str]:
     """Compare two numeric reward values using the given operator and tolerance.
 
     Returns a dict with ``status`` and ``msg`` (a plain string, compatible with
