@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 from backend.database.connection import Database
 from backend.database.exceptions import IntegrityFailure, OperationLockedError
@@ -18,7 +18,7 @@ from backend.database.utils import (
     unique_preserving_order,
     utc_now_iso,
 )
-from backend.provenance.models import Artifact, ImpactAnalysis, Incident
+from backend.provenance.models import ImpactAnalysis, Incident
 from backend.provenance.service import ProvenanceService
 
 from .exceptions import (
@@ -31,7 +31,6 @@ from .models import (
     CheckOutcome,
     CompatibilityCheck,
     Recovery,
-    RecoveryAction,
     RecoveryAssessment,
     RecoveryAssessmentRequest,
     RecoveryCreateRequest,
@@ -57,7 +56,7 @@ def _check(
     name: str,
     outcome: str,
     detail: str,
-    evidence_ids: Optional[list[str]] = None,
+    evidence_ids: list[str] | None = None,
 ) -> CompatibilityCheck:
     return CompatibilityCheck(
         name=name,
@@ -68,7 +67,7 @@ def _check(
 
 
 def _resolve_checkpoint(
-    conn: sqlite3.Connection, identifier: Optional[str]
+    conn: sqlite3.Connection, identifier: str | None
 ) -> dict[str, Any] | None:
     if not identifier:
         return None
@@ -91,8 +90,8 @@ class RecoveryService:
         *,
         incident: Incident,
         impact: ImpactAnalysis,
-        run_agent_fingerprint: Optional[str],
-        checkpoint: Optional[dict[str, Any]],
+        run_agent_fingerprint: str | None,
+        checkpoint: dict[str, Any] | None,
         request: RecoveryAssessmentRequest,
     ) -> dict[str, Any]:
         checks: list[CompatibilityCheck] = []
@@ -487,7 +486,7 @@ class RecoveryService:
         incident_id: str,
         request: RecoveryAssessmentRequest,
         *,
-        correlation_id: Optional[str] = None,
+        correlation_id: str | None = None,
     ) -> RecoveryAssessment:
         if request.idempotency_key:
             with self.database.read() as conn:
@@ -621,7 +620,7 @@ class RecoveryService:
         incident_id: str,
         request: RecoveryCreateRequest,
         *,
-        correlation_id: Optional[str] = None,
+        correlation_id: str | None = None,
     ) -> Recovery:
         if request.idempotency_key:
             with self.database.read() as conn:
@@ -664,7 +663,7 @@ class RecoveryService:
         approval = request.approval or Approval()
         warnings = list(assessment.warnings)
         status = "proposed"
-        failure_reason: Optional[str] = None
+        failure_reason: str | None = None
         if assessment.recovery_eligibility is RecoveryEligibility.ineligible:
             status = "blocked"
             failure_reason = (
@@ -783,7 +782,7 @@ class RecoveryService:
         self,
         recovery_id: str,
         *,
-        correlation_id: Optional[str],
+        correlation_id: str | None,
         action: str,
         status: str,
         **fields: Any,
@@ -811,7 +810,7 @@ class RecoveryService:
         *,
         assessment: RecoveryAssessment,
         request: RecoveryCreateRequest,
-        correlation_id: Optional[str],
+        correlation_id: str | None,
     ) -> dict[str, Any]:
         recovery_id = recovery["recovery_id"]
         if recovery["recovery_strategy"] != RecoveryStrategy.restore_checkpoint.value:
@@ -901,7 +900,7 @@ class RecoveryService:
                     }
                 },
             )
-            recovered = self._update_recovery(
+            _recovered = self._update_recovery(
                 recovery_id,
                 correlation_id=correlation_id,
                 action="executing",
@@ -939,7 +938,7 @@ class RecoveryService:
             new_artifact_id = new_id("artifact")
             new_checkpoint_id = new_id("checkpoint")
             with self.database.write() as conn:
-                artifact = artifacts_repo.create_artifact(
+                _artifact = artifacts_repo.create_artifact(
                     conn,
                     artifact_id=new_artifact_id,
                     run_id=source["run_id"],
@@ -1050,8 +1049,10 @@ class RecoveryService:
                         unique_preserving_order(
                             [
                                 *recovery.get("warnings", []),
-                                "Recovery execution completed; recovery success "
-                                "requires a post-recovery evaluation.",
+                                (
+                                    "Recovery execution completed; recovery success "
+                                    "requires a post-recovery evaluation."
+                                ),
                             ]
                         )
                     ),
@@ -1069,7 +1070,7 @@ class RecoveryService:
                     },
                 )
             return updated
-        except Exception as exc:  # execution boundary: preserve failure state
+        except Exception as exc:  # execution boundary: preserve failure state  # noqa: BLE001
             failure_message = (
                 "Recovery execution failed or was blocked; the source checkpoint "
                 "was not modified."
@@ -1101,7 +1102,7 @@ class RecoveryService:
                     failure_reason=failure_message,
                     executed_actions_json=dumps(failed_actions),
                 )
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
             with self.database.read() as conn:
                 current = recoveries_repo.get_recovery(conn, recovery_id)
@@ -1112,7 +1113,7 @@ class RecoveryService:
                     locks_repo.release_lock(
                         conn, lock_key=lock_key, owner_id=owner
                     )
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
 
     def get_recovery(self, incident_id: str, recovery_id: str) -> Recovery:

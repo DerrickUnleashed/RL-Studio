@@ -13,23 +13,23 @@ natural-language intent, and supporting optional / incomplete inputs.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import ValidationError
 
-from backend.verification.models import VerificationInput, VerificationContext
 from backend.verification.exceptions import InputValidationError
+from backend.verification.models import VerificationInput
+
 from .schema_normalizer import (
     normalise_verification_input,
 )
-
 
 # ---------------------------------------------------------------------------
 # Public adapter function
 # ---------------------------------------------------------------------------
 
 def adapt_input(
-    raw: Dict[str, Any],
+    raw: dict[str, Any],
     *,
     create_context: bool = True,
 ) -> VerificationInput:
@@ -59,7 +59,7 @@ def adapt_input(
         ``TypeError``: If *raw* is not a ``dict``.
     """
     if not isinstance(raw, dict):
-        raise InputValidationError(
+        raise InputValidationError(  # noqa: F823
             "Verification input must be a dictionary, "
             f"got {type(raw).__name__}"
         )
@@ -85,9 +85,8 @@ def adapt_input(
     #    without requiring them — they remain ``Optional``.
     if create_context:
         # Build a minimal context; caller can enrich later
-        from backend.verification.input.context_builder import build_context
 
-        ctx = build_context(vi)
+        # ctx = build_context(vi)
         # Return the input; the context is available separately.
         # We attach it as a convenience so callers don't need an extra step.
         # Note: VerificationInput does not have a ``context`` field,
@@ -103,11 +102,11 @@ def adapt_input(
 
 def adapt_from_parts(
     *,
-    agent_metadata: Optional[Dict[str, Any]] = None,
-    environment_config: Optional[Dict[str, Any]] = None,
-    training_config: Optional[Dict[str, Any]] = None,
-    developer_intent: Optional[str] = None,
-    execution_evidence: Optional[Dict[str, Any]] = None,
+    agent_metadata: dict[str, Any] | None = None,
+    environment_config: dict[str, Any] | None = None,
+    training_config: dict[str, Any] | None = None,
+    developer_intent: str | None = None,
+    execution_evidence: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> VerificationInput:
     """Adapt verification input from explicit parts.
@@ -132,7 +131,7 @@ def adapt_from_parts(
             invalid, or if any component fails normalisation.
     """
     # Build the raw dict only from provided, non-None parts
-    parts: Dict[str, Any] = {}
+    parts: dict[str, Any] = {}
     if agent_metadata is not None:
         parts["agent_metadata"] = agent_metadata
     if environment_config is not None:

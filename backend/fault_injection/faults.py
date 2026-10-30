@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -39,9 +38,7 @@ class FaultInjector:
             return False  # no cross-run leakage within instance
         if episode < self.config.trigger_episode:
             return False
-        if step < self.config.trigger_step:
-            return False
-        return True
+        return step >= self.config.trigger_step
 
     def apply_reward_scaling(self, reward: float, step: int, episode: int) -> float:
         if not self.should_trigger(step, episode):

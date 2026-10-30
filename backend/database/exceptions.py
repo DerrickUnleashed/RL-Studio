@@ -8,7 +8,7 @@ diagnostics and secrets must not be placed in ``message``.
 from __future__ import annotations
 
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class StudioError(Exception):
@@ -18,8 +18,8 @@ class StudioError(Exception):
     def __init__(
         self,
         message: str = "An unexpected persistence error occurred",
-        details: Optional[Dict[str, Any]] = None,
-        correlation_id: Optional[str] = None,
+        details: dict[str, Any] | None = None,
+        correlation_id: str | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message

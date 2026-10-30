@@ -32,27 +32,16 @@ Key design points:
 from __future__ import annotations
 
 import json
-import re
-import warnings
 import logging
-import uuid
+import re
 import time
-from typing import Any, Dict, List, Optional
+import uuid
+import warnings
 
 from pydantic import BaseModel, Field, ValidationError, validator
 
 from backend.verification.exceptions import (  # typed guardrail errors
     InputValidationError,
-    MetaAIProviderError,
-    GuardrailViolation,
-)
-
-from backend.verification.models import (  # canonical models used for validation
-    VerificationRequirement,
-    VerificationCheckResult,
-    CheckStatus,
-    RequirementType,
-    RequirementSource,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,7 +60,7 @@ class PromptInput(BaseModel):
 
     system_instruction: str = Field(..., description="Trusted system governing instructions")
     user_content: str = Field(..., description="Untrusted user-supplied content")
-    developer_description: Optional[str] = Field(
+    developer_description: str | None = Field(
         None, description="Developer-provided description of intent or context"
     )
     max_user_content_chars: int = Field(
@@ -108,7 +97,7 @@ class PromptInput(BaseModel):
 def validate_prompt_input(
     system_instruction: str,
     user_content: str,
-    developer_description: Optional[str] = None,
+    developer_description: str | None = None,
     max_chars: int = 4000,
 ) -> PromptInput:
     """Validate and construct a ``PromptInput`` from raw prompt components.
@@ -154,7 +143,6 @@ def validate_model_output(
     - If validation fails, ``validated_model`` is ``None`` and ``violation``
       contains details.
     """
-    import uuid
     try:
         validated = canonical_model(**json.loads(raw_output)) if raw_output.strip().startswith("{") else canonical_model(raw_output)
         return validated, None
@@ -168,7 +156,7 @@ def validate_model_output(
         return None, violation
 
 
-def reject_unknown_tool(tool_id: str, registered_tools: set) -> Optional[ModelOutputViolation]:
+def reject_unknown_tool(tool_id: str, registered_tools: set) -> ModelOutputViolation | None:
     """Reject a model-suggested tool identifier that is not in the
     registered set.
 
@@ -190,7 +178,7 @@ def validate_tool_arguments(
     tool_id: str,
     args: dict,
     registered_tool_schemas: dict,
-) -> Optional[ModelOutputViolation]:
+) -> ModelOutputViolation | None:
     """Validate suggested tool arguments against a registered tool schema.
 
     If the tool_id is not in the registered schemas, a violation is returned.
@@ -222,13 +210,12 @@ def validate_tool_arguments(
 
 class EvidenceIntegrityError(ModelOutputViolation):
     """Raised when model output attempts to fabricate or corrupt evidence."""
-    pass
 
 
 def verify_evidence_source(
     evidence_ref: dict,
     trusted_sources: frozenset,
-) -> Optional[ModelOutputViolation]:
+) -> ModelOutputViolation | None:
     """Check that an evidence reference originates from a trusted source.
 
     The model must not fabricate metrics, rewards, trajectories,
@@ -317,7 +304,7 @@ def apply_guardrails(
 
     # 1. Validate prompt input (bounds, trusted system instruction)
     try:
-        validated_input = validate_prompt_input(
+        _ = validate_prompt_input(
             system_instruction=prompt_input.system_instruction,
             user_content=prompt_input.user_content,
             developer_description=prompt_input.developer_description,
@@ -346,7 +333,7 @@ def apply_guardrails(
         )
 
     # 3. Validate model output against canonical schema
-    validated_model, output_violation = validate_model_output(
+    _validated_model, output_violation = validate_model_output(
         raw_model_output, canonical_model
     )
     if output_violation is not None:

@@ -8,29 +8,20 @@ logic.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
-
-from backend.verification.exceptions import chain_error
+from typing import Any, Protocol
 
 from backend.verification.models import (
-    AgentMetadata,
-    VerificationInput,
-    VerificationContext,
-    VerificationRequirement,
-    VerificationPlan,
-    VerificationPlanStep,
-    VerificationCheckResult,
-    VerificationResult,
-    VerificationReport,
+    AnomalyObservation,
     EvidenceReference,
     MetricObservation,
-    AnomalyObservation,
-    CheckStatus,
-    RequirementSource,
-    RequirementType,
-    AnomalyType,
+    VerificationCheckResult,
+    VerificationContext,
+    VerificationInput,
+    VerificationPlan,
+    VerificationReport,
+    VerificationRequirement,
+    VerificationResult,
 )
-
 
 # ---------------------------------------------------------------------------
 # 1. Meta AI provider interface
@@ -46,7 +37,7 @@ class MetaAIProvider(Protocol):
     provider class.
     """
 
-    def investigate(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def investigate(self, request: dict[str, Any]) -> dict[str, Any]:
         """Run an investigation against the given structured request.
 
         Args:
@@ -97,8 +88,8 @@ class IntentInterpretation(Protocol):
         input_data: VerificationInput,
         context: VerificationContext,
     ) -> tuple[
-        List[VerificationRequirement],
-        Dict[str, Any],
+        list[VerificationRequirement],
+        dict[str, Any],
     ]:
         """Interpret developer intent and produce structured requirements.
 
@@ -138,7 +129,7 @@ class WorkflowPlanner(Protocol):
 
     def plan(
         self,
-        requirements: List[VerificationRequirement],
+        requirements: list[VerificationRequirement],
         context: VerificationContext,
     ) -> VerificationPlan:
         """Generate a verification plan from the given requirements.
@@ -196,7 +187,7 @@ class VerificationTool(Protocol):
     def execute(
         self,
         context: VerificationContext,
-        arguments: Dict[str, Any],
+        arguments: dict[str, Any],
     ) -> VerificationCheckResult:
         """Execute the check against the given context and typed arguments.
 
@@ -240,7 +231,7 @@ class _VerificationToolBase:
     def execute(
         self,
         context: VerificationContext,
-        arguments: Dict[str, Any],
+        arguments: dict[str, Any],
     ) -> VerificationCheckResult:
         """Default ``execute`` that validates presence of essential fields and
         delegates to ``_run_check``.
@@ -259,7 +250,7 @@ class _VerificationToolBase:
     def _run_check(
         self,
         context: VerificationContext,
-        arguments: Dict[str, Any],
+        arguments: dict[str, Any],
     ) -> VerificationCheckResult:
         """Concrete tools must implement this method.
 
@@ -284,7 +275,7 @@ class AnomalyDetector(Protocol):
     supporting deterministic requirement checks.
     """
 
-    def detect(self, observations: List[MetricObservation], context: VerificationContext) -> List[AnomalyObservation]:
+    def detect(self, observations: list[MetricObservation], context: VerificationContext) -> list[AnomalyObservation]:
         """Detect anomalies from the given metric observations.
 
         Args:
@@ -319,10 +310,10 @@ class EvidenceProvider(Protocol):
 
     def get_evidence(
         self,
-        run_identifier: Optional[str] = None,
-        environment_identifier: Optional[str] = None,
-        evidence_ids: Optional[List[str]] = None,
-    ) -> List[EvidenceReference]:
+        run_identifier: str | None = None,
+        environment_identifier: str | None = None,
+        evidence_ids: list[str] | None = None,
+    ) -> list[EvidenceReference]:
         """Retrieve evidence references for the given run/environment.
 
         Args:
@@ -360,7 +351,7 @@ class VerificationStorage(Protocol):
     def save_verification_input(
         self,
         input_data: VerificationInput,
-        context: Optional[VerificationContext] = None,
+        context: VerificationContext | None = None,
     ) -> str:
         """Persist a ``VerificationInput`` and return a stable storage ID.
 
