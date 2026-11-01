@@ -65,16 +65,18 @@ export function findLayoutIssues(snapshot: WarehouseEnvironmentSnapshot): string
  * Validate a recorded trajectory against its environment layout. Rendering
  * never silently clips unrenderable points: the viewer reports them.
  *
- * Adjacency between consecutive points is checked only when both neighbours
- * are present in the recording; gaps below the minimum recorded timestep are
- * expected (partial recordings) and are not flagged.
+ * Consecutive steps must be reachable within the elapsed timesteps, except
+ * across an episode boundary: when a point is marked `terminated`, the
+ * environment resets and the next recorded position legitimately restarts at
+ * the start cell.
  */
 export function findTrajectoryIssues(replay: SimulationReplay): string[] {
   const issues: string[] = []
   const { environment, trajectory } = replay
   const { rows, cols } = environment
 
-  for (const point of trajectory) {
+  for (const index in trajectory) {
+    const point = trajectory[index] as TrajectoryPoint
     if (!cellInsideGrid(point.cell, rows, cols)) {
       issues.push(`Timestep ${point.timestep} records a position outside the recorded grid.`)
     }
@@ -86,6 +88,11 @@ export function findTrajectoryIssues(replay: SimulationReplay): string[] {
     if (point.timestep <= previous.timestep) {
       issues.push('The recorded trajectory is not in ascending timestep order.')
       break
+    }
+    if (previous.terminated) {
+      // Episode completed and the environment reset: arrival at the start
+      // cell of the next episode is recorded behaviour, not corrupted data.
+      continue
     }
     const distance = manhattanDistance(previous.cell, point.cell)
     if (distance > point.timestep - previous.timestep) {
