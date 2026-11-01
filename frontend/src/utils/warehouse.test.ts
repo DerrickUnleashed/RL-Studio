@@ -124,6 +124,22 @@ describe('findTrajectoryIssues', () => {
     expect(issues.some((issue) => /farther than elapsed timesteps allow/.test(issue))).toBe(true)
   })
 
+  it('permits the environment reset across a terminated episode boundary', () => {
+    const issues = findTrajectoryIssues(
+      replay({
+        // Episode 1 ends at (7,9); the environment resets and episode 2 starts
+        // at (0,0) — a discontinuity recorded behaviour requires.
+        trajectory: [
+          point(800, cell(0, 4)),
+          point(812, cell(7, 9), true),
+          point(813, cell(0, 0)),
+          point(814, cell(0, 1)),
+        ],
+      }),
+    )
+    expect(issues).toEqual([])
+  })
+
   it('allows a partial recording that starts mid-episode without flagging axes', () => {
     // A recording that starts at timestep 800 has no "previous" position to
     // compare against, so no adjacency charge is raised at the start.
