@@ -57,9 +57,7 @@ function harness(throwOnCreate = false) {
 describe('useLiveEvents', () => {
   it('does not connect without a selected run and says so honestly', () => {
     const probe = harness()
-    const { result } = renderHook(() =>
-      useLiveEvents(null, { createStream: probe.createStream }),
-    )
+    const { result } = renderHook(() => useLiveEvents(null, { createStream: probe.createStream }))
 
     expect(result.current.connection).toBe('not_configured')
     expect(result.current.events).toEqual([])
