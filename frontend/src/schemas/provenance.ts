@@ -30,7 +30,8 @@ export type ArtifactType =
   | 'other'
 
 /** Artifact availability (`ArtifactStatus`). */
-export type ArtifactStatus = 'available' | 'missing' | 'superseded' | 'deleted' | 'invalid' | 'unknown'
+export type ArtifactStatus =
+  'available' | 'missing' | 'superseded' | 'deleted' | 'invalid' | 'unknown'
 
 /** Integrity claim on an artifact (`IntegrityStatus`). */
 export type IntegrityStatus = 'verified' | 'unverified' | 'mismatch' | 'missing'
