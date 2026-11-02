@@ -135,7 +135,12 @@ describe('WarehouseGridView', () => {
       <WarehouseGridView
         replay={localReplay}
         timestep={2}
-        options={{ ...DEFAULT_DISPLAY_OPTIONS, showObstacles: false, showGoal: false, showTrajectory: false }}
+        options={{
+          ...DEFAULT_DISPLAY_OPTIONS,
+          showObstacles: false,
+          showGoal: false,
+          showTrajectory: false,
+        }}
       />,
     )
     expect(screen.queryByTestId('obstacle-cell')).not.toBeInTheDocument()

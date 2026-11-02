@@ -35,7 +35,11 @@ const OBSTACLES = [
   { row: 5, col: 7 },
 ]
 
-function walk(from: TrajectoryPoint['cell'], to: { row: number; col: number }, timesteps: number[]): TrajectoryPoint[] {
+function walk(
+  from: TrajectoryPoint['cell'],
+  to: { row: number; col: number },
+  timesteps: number[],
+): TrajectoryPoint[] {
   const points: TrajectoryPoint[] = []
   let [row, col] = [from.row, from.col]
   let index = 0

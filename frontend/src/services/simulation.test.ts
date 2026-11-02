@@ -27,7 +27,9 @@ describe('real adapter (mocks disabled)', () => {
 
   it('fetches the recorded replay from the planned endpoint', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
-    const fetchMock = vi.fn(async () => jsonResponse(200, { run_id: DEMO_RUN_ID, schema_version: '1.0' }))
+    const fetchMock = vi.fn(async () =>
+      jsonResponse(200, { run_id: DEMO_RUN_ID, schema_version: '1.0' }),
+    )
     vi.stubGlobal('fetch', fetchMock)
 
     const service = createSimulationService()
@@ -41,7 +43,10 @@ describe('real adapter (mocks disabled)', () => {
 
   it('returns honest not_found / unavailable until the endpoint exists', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(404, { detail: 'Not Found' })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse(404, { detail: 'Not Found' })),
+    )
     const service = createSimulationService()
 
     const result = await service.getRunSimulation(DEMO_RUN_ID)
