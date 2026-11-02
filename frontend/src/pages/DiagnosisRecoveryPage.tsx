@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ApplicationShell } from '../components/layout/ApplicationShell'
 import { Panel } from '../components/ui/Panel'
@@ -16,7 +16,15 @@ import { investigateState } from '../features/investigation/investigationState'
 import { useServiceQuery, type ServiceQueryState } from '../hooks/useServiceQuery'
 import { createVerificationService, type VerificationService } from '../services/verification'
 import { createInvestigationService, type InvestigationService } from '../services/investigation'
+import { createProvenanceService, type ProvenanceService } from '../services/provenance'
+import { createRecoveryService, type RecoveryService } from '../services/recovery'
+import { createEvaluationService, type EvaluationService } from '../services/evaluation'
 import type { ServiceError } from '../services/types'
+import { ProvenanceView } from '../components/simulation/ProvenanceView'
+import { RecoveryPanel } from '../features/recovery/RecoveryPanel'
+import { createIdempotencyKey } from '../features/recovery/idempotencyKey'
+import { EvaluationPanel } from '../features/evaluation/EvaluationPanel'
+import type { RecoveryAssessment, Recovery } from '../schemas/recovery'
 import { mocksEnabled, MOCK_DATA_LABEL, unwrapMockData, type MockData } from '../mocks'
 import type { AnomalyObservation, IncidentRecord } from '../schemas/verification'
 import { WarehousePlaybackViewer } from '../components/simulation/WarehousePlaybackViewer'
@@ -263,18 +271,191 @@ function AnomalySection({
   )
 }
 
+/** Request control style, shared with the app's inline buttons. */
+const sectionButtonStyle = {
+  padding: '6px 14px',
+  background: 'var(--bg-input)',
+  border: '1px solid var(--border-primary)',
+  borderRadius: 'var(--radius-sm)',
+  color: 'var(--text-primary)',
+  cursor: 'pointer',
+  fontFamily: 'var(--font-sans)',
+} as const
+
+/**
+ * Provenance section: the run's recorded trace plus the incident's recorded
+ * impact analysis, fetched from Person 4's live endpoints.
+ */
+function ProvenanceSection({ runId, incidentId }: { runId: string; incidentId: string }) {
+  const services = useMemo(() => createProvenanceService() as ProvenanceService, [])
+  const trace = useServiceQuery(() => services.getRunProvenance(runId), [services, runId])
+  const impact = useServiceQuery(
+    () => services.getIncidentImpact(incidentId),
+    [services, incidentId],
+  )
+
+  return (
+    <Panel
+      title="Provenance"
+      description="Recorded artifact lineage and incident impact. Unknown lineage stays unknown and is never reported as unaffected."
+    >
+      <ProvenanceView trace={trace.state} impact={impact.state} onReloadTrace={trace.reload} />
+    </Panel>
+  )
+}
+
+/**
+ * Live recovery workflow: a compatibility assessment is requested explicitly,
+ * the recorded assessment drives the gated execution request, and the created
+ * recovery record is tracked from the response. Nothing is created implicitly.
+ */
+function RecoveryWorkflowSection({
+  incidentId,
+  recoveryService,
+}: {
+  incidentId: string
+  recoveryService: RecoveryService
+}) {
+  const [assessment, setAssessment] = useState<ServiceQueryState<RecoveryAssessment> | null>(null)
+  const [recoveryRecord, setRecoveryRecord] = useState<ServiceQueryState<Recovery> | null>(null)
+  const [requestPending, setRequestPending] = useState(false)
+  const [requestError, setRequestError] = useState<ServiceError | null>(null)
+  // One key per assessment intent; reused if the same request is retried.
+  const idempotencyRef = useRef<string | null>(null)
+
+  const handleRequestAssessment = useCallback(async () => {
+    if (requestPending) return
+    if (!idempotencyRef.current) idempotencyRef.current = createIdempotencyKey()
+    setRequestPending(true)
+    setRequestError(null)
+    const result = await recoveryService.createAssessment(incidentId, {
+      idempotency_key: idempotencyRef.current,
+    })
+    if (result.state === 'error') {
+      setRequestError(result.error)
+    } else {
+      setAssessment({ state: 'ok', data: result.data })
+    }
+    setRequestPending(false)
+  }, [requestPending, recoveryService, incidentId])
+
+  return (
+    <Panel
+      title="Recovery workflow"
+      description="Eligibility and compatibility are computed by the recovery service; the backend remains authoritative."
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        <p style={emptyText}>
+          Requesting a compatibility assessment is an explicit, idempotent request. The backend
+          computes eligibility and compatibility itself; the frontend cannot declare an eligible
+          assessment into existence.
+        </p>
+        <div>
+          <button
+            type="button"
+            style={sectionButtonStyle}
+            onClick={handleRequestAssessment}
+            disabled={requestPending}
+          >
+            Request compatibility assessment
+          </button>
+        </div>
+        {requestPending && (
+          <p role="status" style={inlineStatus}>
+            Assessment request in flight…
+          </p>
+        )}
+        {requestError && (
+          <p role="alert" style={inlineStatus}>
+            The assessment request could not be completed: {requestError.message}
+          </p>
+        )}
+        <RecoveryPanel
+          incidentId={incidentId}
+          service={recoveryService}
+          assessment={assessment ?? undefined}
+          recovery={recoveryRecord ?? undefined}
+          onRequested={(record) => setRecoveryRecord({ state: 'ok', data: record })}
+        />
+      </div>
+    </Panel>
+  )
+}
+
+/** The recorded evaluation section, fetched only when a record id is connected. */
+function EvaluationRecordSection({
+  incidentId,
+  evaluationId,
+  evaluationService,
+}: {
+  incidentId: string
+  evaluationId: string
+  evaluationService: EvaluationService
+}) {
+  const evaluation = useServiceQuery(
+    () => evaluationService.getEvaluation(incidentId, evaluationId),
+    [evaluationService, incidentId, evaluationId],
+  )
+  return <EvaluationPanel evaluation={evaluation.state} onReload={evaluation.reload} />
+}
+
+/**
+ * Evaluation display. There is no evaluation-list endpoint, so a record is
+ * shown only when its identifier is explicitly connected via the URL; nothing
+ * is inferred from the recovery status.
+ */
+function EvaluationSection({
+  incidentId,
+  evaluationId,
+  evaluationService,
+}: {
+  incidentId: string
+  evaluationId: string | null
+  evaluationService: EvaluationService
+}) {
+  return (
+    <Panel
+      title="Evaluation"
+      description="Recovery success exists only through the recorded evaluation's acceptance outcome."
+    >
+      {evaluationId === null ? (
+        <p style={emptyText}>
+          No evaluation record is connected to this view. Open this page with
+          ?incidentId=&lt;incident&gt;&amp;evaluationId=&lt;record&gt; to display a recorded
+          evaluation. Without it, recovery success is not established and nothing is computed to
+          fill the gap.
+        </p>
+      ) : (
+        <EvaluationRecordSection
+          incidentId={incidentId}
+          evaluationId={evaluationId}
+          evaluationService={evaluationService}
+        />
+      )}
+    </Panel>
+  )
+}
+
 /**
  * Live incident workspace: all four panels are driven by the domain services.
  * Detection (deterministic verification), statistical signals (anomalies), and
  * the advisory AI investigation remain separate sections, and no investigator
  * analysis is requested implicitly.
  */
-function IncidentWorkspace({ incidentId }: { incidentId: string }) {
+function IncidentWorkspace({
+  incidentId,
+  evaluationId,
+}: {
+  incidentId: string
+  evaluationId: string | null
+}) {
   const services = useMemo(
     () =>
       ({
         verification: createVerificationService() as VerificationService,
         investigation: createInvestigationService() as InvestigationService,
+        recovery: createRecoveryService() as RecoveryService,
+        evaluation: createEvaluationService() as EvaluationService,
       }) as const,
     [],
   )
@@ -382,6 +563,20 @@ function IncidentWorkspace({ incidentId }: { incidentId: string }) {
         )}
       </Panel>
 
+      {incidentRecord?.run_id ? (
+        <ProvenanceSection runId={incidentRecord.run_id} incidentId={incidentId} />
+      ) : incidentState.state === 'ok' ? (
+        <Panel
+          title="Provenance"
+          description="Recorded artifact lineage and incident impact. Unknown lineage stays unknown and is never reported as unaffected."
+        >
+          <p style={emptyText}>
+            The loaded incident record does not identify a run, so no provenance trace is requested.
+            A trace is only fetched for the run identifier the record names.
+          </p>
+        </Panel>
+      ) : null}
+
       <Panel
         title="AI Diagnosis"
         description="The analysis is an AI-assisted interpretation of recorded evidence and is advisory."
@@ -406,6 +601,13 @@ function IncidentWorkspace({ incidentId }: { incidentId: string }) {
           </p>
         )}
       </Panel>
+
+      <RecoveryWorkflowSection incidentId={incidentId} recoveryService={services.recovery} />
+      <EvaluationSection
+        incidentId={incidentId}
+        evaluationId={evaluationId}
+        evaluationService={services.evaluation}
+      />
     </div>
   )
 }
@@ -414,6 +616,9 @@ export function DiagnosisRecoveryPage() {
   const [searchParams] = useSearchParams()
   const incidentParam = searchParams.get('incidentId')
   const incidentId = incidentParam !== null && incidentParam.trim() !== '' ? incidentParam : null
+  const evaluationParam = searchParams.get('evaluationId')
+  const evaluationId =
+    evaluationParam !== null && evaluationParam.trim() !== '' ? evaluationParam : null
 
   return (
     <ApplicationShell>
@@ -474,7 +679,11 @@ export function DiagnosisRecoveryPage() {
             : ''}
         </p>
 
-        {incidentId ? <IncidentWorkspace incidentId={incidentId} /> : <StaticDiagnosisSection />}
+        {incidentId ? (
+          <IncidentWorkspace incidentId={incidentId} evaluationId={evaluationId} />
+        ) : (
+          <StaticDiagnosisSection />
+        )}
 
         <Panel title="Recovery" description="Proposed and executed actions are tracked separately.">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
