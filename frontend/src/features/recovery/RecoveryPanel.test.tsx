@@ -212,7 +212,8 @@ describe('RecoveryPanel — gating', () => {
 
 describe('RecoveryPanel — confirmation-gated execution request', () => {
   it('sends the execution request only after explicit confirmation', async () => {
-    const service = fakeService()
+    const record = recovery()
+    const service = fakeService({ state: 'ok', data: record })
     const onRequested = vi.fn()
     render(
       <RecoveryPanel
@@ -244,6 +245,8 @@ describe('RecoveryPanel — confirmation-gated execution request', () => {
     expect(typeof request['idempotency_key']).toBe('string')
 
     await waitFor(() => expect(onRequested).toHaveBeenCalledTimes(1))
+    // The page receives the created record so it can track execution state.
+    expect(onRequested).toHaveBeenCalledWith(record)
     // The dialog closes after the confirmed request completes.
     expect(screen.queryByRole('button', { name: 'Send execution request' })).not.toBeInTheDocument()
   })
