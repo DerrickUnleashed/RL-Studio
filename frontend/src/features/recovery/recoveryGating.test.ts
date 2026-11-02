@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import type { Recovery, RecoveryAssessment, RecoveryCompatibilityCheck } from '../../schemas/recovery'
-import { assessmentGate, recoveryOutcomeClaim, recoveryPresentation, strategyLabel } from './recoveryGating'
+import type {
+  Recovery,
+  RecoveryAssessment,
+  RecoveryCompatibilityCheck,
+} from '../../schemas/recovery'
+import {
+  assessmentGate,
+  recoveryOutcomeClaim,
+  recoveryPresentation,
+  strategyLabel,
+} from './recoveryGating'
 
-function check(name: string, outcome: RecoveryCompatibilityCheck['outcome']): RecoveryCompatibilityCheck {
+function check(
+  name: string,
+  outcome: RecoveryCompatibilityCheck['outcome'],
+): RecoveryCompatibilityCheck {
   return { name, outcome, detail: 'recorded detail', evidence_ids: [] }
 }
 
@@ -52,7 +64,9 @@ describe('assessmentGate', () => {
 
   it('never softens non-pass check outcomes into passes', () => {
     for (const outcome of ['fail', 'unknown', 'blocked', 'skipped'] as const) {
-      const gate = assessmentGate(assessment({ compatibility: [check('lineage verified', outcome)] }))
+      const gate = assessmentGate(
+        assessment({ compatibility: [check('lineage verified', outcome)] }),
+      )
       expect(gate.canRequestExecution).toBe(false)
       expect(gate.allChecksPassed).toBe(false)
     }
