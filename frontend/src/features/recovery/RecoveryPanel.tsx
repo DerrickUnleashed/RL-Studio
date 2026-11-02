@@ -34,6 +34,7 @@ import {
   recoveryPresentation,
   strategyLabel,
 } from './recoveryGating'
+import { createIdempotencyKey } from './idempotencyKey'
 
 type PanelState<T> = ServiceQueryState<T | MockData<T>>
 
@@ -74,18 +75,6 @@ function checkGlyph(outcome: string): 'check' | 'cross' | 'query' {
     default:
       return 'query'
   }
-}
-
-/**
- * Generate an idempotency key for the recovery intent. Uses the platform
- * crypto when available, with a timed fallback for jsdom/test environments.
- */
-function createIdempotencyKey(): string {
-  const cryptoRef = globalThis.crypto as Crypto | undefined
-  if (typeof cryptoRef?.randomUUID === 'function') {
-    return cryptoRef.randomUUID()
-  }
-  return `recovery-req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
 /** The assessment body: eligibility, identity, and the recorded check list. */
@@ -314,8 +303,8 @@ export interface RecoveryPanelProps {
   recovery?: PanelState<Recovery>
   /** Reload the assessment read (a safe GET by the supplying page). */
   onReloadAssessment?: () => void
-  /** Called after a successful execution request so the page can refresh. */
-  onRequested?: () => void
+  /** Called with the created recovery record so the page can track it. */
+  onRequested?: (recovery: Recovery) => void
 }
 
 export function RecoveryPanel({
@@ -375,7 +364,7 @@ export function RecoveryPanel({
       return
     }
     setConfirmOpen(false)
-    onRequested?.()
+    onRequested?.(result.data)
   }, [resolvedAssessment, requestPending, service, incidentId, onRequested])
 
   return (
