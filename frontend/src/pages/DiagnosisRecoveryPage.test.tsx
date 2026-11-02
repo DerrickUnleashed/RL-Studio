@@ -118,6 +118,30 @@ describe('DiagnosisRecoveryPage with a focused incident (sample-data mode)', () 
     expect(within(incident).getAllByText('Not available').length).toBeGreaterThan(0)
   })
 
+  it('plays the run trajectory with markers only at recorded evidence events', async () => {
+    renderFocused()
+
+    // The incident record names the run; the panel loads that run's replay.
+    const trajectory = await screen.findByRole('region', { name: 'Recorded trajectory' })
+    const grid = await within(trajectory).findByTestId('warehouse-grid')
+    expect(within(trajectory).getAllByText('Sample data')).not.toHaveLength(0)
+    // The label binds samples and live claims apart inside the panel.
+    expect(grid.getAttribute('aria-label') ?? '').toMatch(/recorded replay; not a live simulation/i)
+
+    // Playback starts at the recording's first recorded timestep.
+    await within(trajectory).findByRole('slider')
+    expect(within(trajectory).getByRole('slider')).toHaveAttribute(
+      'aria-valuetext',
+      'Timestep 796 of 825',
+    )
+
+    // Only the incident's recorded evidence event is annotated — nothing is
+    // inferred from metric context.
+    const markers = within(trajectory).getAllByTestId('fault-marker')
+    expect(markers).toHaveLength(1)
+    expect(markers[0]).toHaveAttribute('data-event-id', 'evt_demo_step_812')
+  })
+
   it('labels anomaly findings as detector signals, not confirmed faults', async () => {
     renderFocused()
 
