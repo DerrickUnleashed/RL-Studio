@@ -19,6 +19,7 @@ import { createInvestigationService, type InvestigationService } from '../servic
 import type { ServiceError } from '../services/types'
 import { mocksEnabled, MOCK_DATA_LABEL, unwrapMockData, type MockData } from '../mocks'
 import type { AnomalyObservation, IncidentRecord } from '../schemas/verification'
+import { WarehousePlaybackViewer } from '../components/simulation/WarehousePlaybackViewer'
 
 // Recovery stages are rendered only from a recorded recovery plan (Person 4's
 // records). No plan is loaded here, so no stage sequence is assumed.
@@ -365,6 +366,21 @@ function IncidentWorkspace({ incidentId }: { incidentId: string }) {
           </Panel>
         </div>
       </div>
+
+      <Panel
+        title="Recorded trajectory"
+        description="Agent positions come from the run's own recorded replay; the incident's evidence events are the only annotated fault markers."
+      >
+        {incidentRecord?.run_id ? (
+          <WarehousePlaybackViewer runId={incidentRecord.run_id} />
+        ) : (
+          <p style={emptyText}>
+            {incidentState.state === 'loading'
+              ? 'Loading the incident record…'
+              : 'The loaded incident record does not identify a run, so no trajectory can be loaded. The run identifier must come from the record; it is never inferred from evidence text.'}
+          </p>
+        )}
+      </Panel>
 
       <Panel
         title="AI Diagnosis"
