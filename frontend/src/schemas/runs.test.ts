@@ -114,8 +114,9 @@ describe('payload validation', () => {
     ).toEqual({ run_id: 'run_1', status: 'stop_requested', idempotent: true })
 
     expect(parseRunStopPayload({ run_id: 'run_1' })).toBeNull()
-    expect(parseRunStopPayload({ run_id: 'run_1', status: 'stop_requested', idempotent: 'yes' }))
-      .toBeNull()
+    expect(
+      parseRunStopPayload({ run_id: 'run_1', status: 'stop_requested', idempotent: 'yes' }),
+    ).toBeNull()
   })
 
   it('accepts the documented start shape and rejects anything else', () => {
