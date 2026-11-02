@@ -20,8 +20,7 @@
  */
 import { decodeLiveEventFrame, type LiveEventPayload } from '../schemas/events'
 
-export type LiveTransportState =
-  'connecting' | 'connected' | 'reconnecting' | 'disconnected'
+export type LiveTransportState = 'connecting' | 'connected' | 'reconnecting' | 'disconnected'
 
 /** Minimal WebSocket surface so tests can inject a deterministic socket. */
 export interface SocketLike {
