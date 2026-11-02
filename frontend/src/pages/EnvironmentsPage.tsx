@@ -96,7 +96,11 @@ export function EnvironmentsPage() {
         <div className="split-layout">
           <Panel
             title="Warehouse Simulation"
-            description={showSampleReplay ? 'Sample-data playback. Not a live simulation.' : 'Illustration preview. Not a running simulation.'}
+            description={
+              showSampleReplay
+                ? 'Sample-data playback. Not a live simulation.'
+                : 'Illustration preview. Not a running simulation.'
+            }
           >
             {showSampleReplay ? (
               <WarehousePlaybackViewer runId={DEMO_RUN_ID} />
