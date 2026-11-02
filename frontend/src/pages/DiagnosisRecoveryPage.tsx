@@ -17,7 +17,7 @@ import { useServiceQuery, type ServiceQueryState } from '../hooks/useServiceQuer
 import { createVerificationService, type VerificationService } from '../services/verification'
 import { createInvestigationService, type InvestigationService } from '../services/investigation'
 import type { ServiceError } from '../services/types'
-import { mocksEnabled, MOCK_DATA_LABEL, type MockData } from '../mocks'
+import { mocksEnabled, MOCK_DATA_LABEL, unwrapMockData, type MockData } from '../mocks'
 import type { AnomalyObservation, IncidentRecord } from '../schemas/verification'
 
 // Recovery stages are rendered only from a recorded recovery plan (Person 4's
@@ -93,11 +93,6 @@ function DiagnosticsGlyph() {
       <path d="M5 20v3M35 20v3" />
     </svg>
   )
-}
-
-/** Remove the shared `Sample data` wrapper from a service payload. */
-function unwrapMock<T extends object>(payload: T | MockData<T>): T {
-  return 'label' in payload ? (payload as MockData<T>).data : payload
 }
 
 /**
@@ -262,7 +257,7 @@ function AnomalySection({
           <StatusBadge label={MOCK_DATA_LABEL} tone="quiet" glyph="dot" />
         </div>
       )}
-      <AnomalyFindingsPanel anomalies={unwrapMock(anomalies.data)} />
+      <AnomalyFindingsPanel anomalies={unwrapMockData(anomalies.data)} />
     </div>
   )
 }
@@ -327,7 +322,7 @@ function IncidentWorkspace({ incidentId }: { incidentId: string }) {
   }, [requestPending, services, incidentId, reloadInvestigation])
 
   const incidentState = incident.state
-  const incidentRecord = incidentState.state === 'ok' ? unwrapMock(incidentState.data) : null
+  const incidentRecord = incidentState.state === 'ok' ? unwrapMockData(incidentState.data) : null
   const investigationBadgeState = investigateState(investigation.state)
 
   return (
