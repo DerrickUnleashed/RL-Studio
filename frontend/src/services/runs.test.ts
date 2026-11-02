@@ -73,13 +73,19 @@ describe('getRunStatus', () => {
   })
 
   it('maps a 404 to not_found and a malformed body to unexpected', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('', { status: 404 })),
+    )
     expect(await createRunService().getRunStatus('run_1')).toEqual({
       state: 'error',
       error: { kind: 'not_found', message: expect.any(String), status: 404 },
     })
 
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ status: 'running' })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse({ status: 'running' })),
+    )
     expect(await createRunService().getRunStatus('run_1')).toEqual({
       state: 'error',
       error: {
@@ -135,7 +141,10 @@ describe('startRun', () => {
   })
 
   it('rejects an acknowledgement without a run id', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ status: 'queued' })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => jsonResponse({ status: 'queued' })),
+    )
 
     const result = await createRunService().startRun({ run_id: 'run_1' })
 
@@ -168,7 +177,10 @@ describe('stopRun', () => {
   })
 
   it('surfaces a conflict as a stable error rather than retrying', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 409 })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('', { status: 409 })),
+    )
 
     const result = await createRunService().stopRun('run_1')
 
