@@ -46,10 +46,22 @@ export interface CriteriaRow {
 
 const CRITERIA_LABELS: ReadonlyArray<{ key: keyof AcceptanceCriteria; label: string }> = [
   { key: 'minimum_recovered_success_rate', label: 'Minimum recovered success rate' },
-  { key: 'minimum_success_rate_improvement_vs_faulty', label: 'Minimum success-rate improvement vs faulty' },
-  { key: 'maximum_success_rate_regression_vs_healthy', label: 'Maximum success-rate regression vs healthy' },
-  { key: 'minimum_mean_reward_improvement_vs_faulty', label: 'Minimum mean-reward improvement vs faulty' },
-  { key: 'maximum_mean_reward_regression_vs_healthy', label: 'Maximum mean-reward regression vs healthy' },
+  {
+    key: 'minimum_success_rate_improvement_vs_faulty',
+    label: 'Minimum success-rate improvement vs faulty',
+  },
+  {
+    key: 'maximum_success_rate_regression_vs_healthy',
+    label: 'Maximum success-rate regression vs healthy',
+  },
+  {
+    key: 'minimum_mean_reward_improvement_vs_faulty',
+    label: 'Minimum mean-reward improvement vs faulty',
+  },
+  {
+    key: 'maximum_mean_reward_regression_vs_healthy',
+    label: 'Maximum mean-reward regression vs healthy',
+  },
   { key: 'maximum_collision_rate', label: 'Maximum collision rate' },
   { key: 'maximum_timeout_rate', label: 'Maximum timeout rate' },
   { key: 'minimum_valid_episodes_per_group', label: 'Minimum valid episodes per group' },
@@ -93,7 +105,12 @@ export function outcomeClaim(record: Evaluation): OutcomeClaim {
     blocked: { label: 'Evaluation blocked', tone: 'quiet' },
   }
   const presentation = labels[outcome]
-  return { label: presentation.label, tone: presentation.tone, outcome, recovery_verified: record.recovery_verified }
+  return {
+    label: presentation.label,
+    tone: presentation.tone,
+    outcome,
+    recovery_verified: record.recovery_verified,
+  }
 }
 
 /**
@@ -155,7 +172,11 @@ export function improvementRows(record: Evaluation): ComparisonRow[] {
     {
       key: 'success_improvement',
       series: 'Success-rate improvement (recovered vs healthy)',
-      columns: { reward: improvementLabel(record.success_rate_improvement), success: '', length: '' },
+      columns: {
+        reward: improvementLabel(record.success_rate_improvement),
+        success: '',
+        length: '',
+      },
     },
   ]
 }

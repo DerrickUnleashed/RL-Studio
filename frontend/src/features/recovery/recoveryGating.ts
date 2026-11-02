@@ -71,7 +71,8 @@ export function assessmentGate(assessment: RecoveryAssessment | null): Assessmen
 
   const failing = compatibility.filter((check) => check.outcome !== 'pass')
   if (failing.length > 0) {
-    const blocking = failing.find((check) => check.outcome === 'fail') ??
+    const blocking =
+      failing.find((check) => check.outcome === 'fail') ??
       (failing[0] as RecoveryCompatibilityCheck)
     return {
       canRequestExecution: false,
@@ -157,7 +158,11 @@ export function recoveryOutcomeClaim(record: Recovery): RecoverySuccessClaim {
     case 'evaluated':
     case 'proposed':
     case 'approved':
-      return { label: 'Recovery proposed; no execution result yet', tone: 'quiet', claim: 'unknown' }
+      return {
+        label: 'Recovery proposed; no execution result yet',
+        tone: 'quiet',
+        claim: 'unknown',
+      }
   }
 }
 
