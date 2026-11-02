@@ -103,10 +103,11 @@ describe('useLiveEvents', () => {
 
   it('discards the previous run’s events and closes its stream when the run changes', () => {
     const probe = harness()
+    const initialProps: { runId: string | null } = { runId: 'run_1' }
     const { result, rerender } = renderHook(
       ({ runId }: { runId: string | null }) =>
         useLiveEvents(runId, { createStream: probe.createStream }),
-      { initialProps: { runId: 'run_1' } },
+      { initialProps },
     )
 
     act(() => probe.emitEvents([event()]))
