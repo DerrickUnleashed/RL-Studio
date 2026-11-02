@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { SimulationReplay, TrajectoryPoint, WarehouseCell, WarehouseEnvironmentSnapshot } from '../schemas/simulation'
+import type {
+  SimulationReplay,
+  TrajectoryPoint,
+  WarehouseCell,
+  WarehouseEnvironmentSnapshot,
+} from '../schemas/simulation'
 import {
   cellIsObstacle,
   cellsEqual,
@@ -14,7 +19,9 @@ export function cell(row: number, col: number): WarehouseCell {
   return { row, col }
 }
 
-export function snapshot(overrides: Partial<WarehouseEnvironmentSnapshot> = {}): WarehouseEnvironmentSnapshot {
+export function snapshot(
+  overrides: Partial<WarehouseEnvironmentSnapshot> = {},
+): WarehouseEnvironmentSnapshot {
   return {
     environment_id: 'env_demo',
     environment_version: 'warehouse_v1',
@@ -93,8 +100,12 @@ describe('findLayoutIssues', () => {
   })
 
   it('reports invalid dimensions instead of rendering a plausible grid', () => {
-    expect(findLayoutIssues(snapshot({ rows: 0, cols: 10 }))).toContain('Grid dimensions are missing or invalid.')
-    expect(findLayoutIssues(snapshot({ rows: Number.NaN, cols: 4 }))).toContain('Grid dimensions are missing or invalid.')
+    expect(findLayoutIssues(snapshot({ rows: 0, cols: 10 }))).toContain(
+      'Grid dimensions are missing or invalid.',
+    )
+    expect(findLayoutIssues(snapshot({ rows: Number.NaN, cols: 4 }))).toContain(
+      'Grid dimensions are missing or invalid.',
+    )
   })
 })
 

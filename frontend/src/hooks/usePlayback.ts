@@ -33,7 +33,11 @@ export interface PlaybackControls {
 
 const DEFAULT_ADVANCE_MS = 220
 
-export function usePlayback(min: number, max: number, advanceMs = DEFAULT_ADVANCE_MS): PlaybackControls {
+export function usePlayback(
+  min: number,
+  max: number,
+  advanceMs = DEFAULT_ADVANCE_MS,
+): PlaybackControls {
   const [timestep, setTimestep] = useState(min)
   const [playing, setPlaying] = useState(false)
   // Mirror of `timestep` so event handlers can guard the end of the recording

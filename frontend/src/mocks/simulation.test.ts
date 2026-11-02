@@ -13,7 +13,9 @@ describe('mock simulation adapter', () => {
 
   it('fails closed when mocks are disabled', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
-    await expect(mockSimulationAdapter.getRunSimulation(DEMO_RUN_ID)).rejects.toThrow(/VITE_USE_MOCKS/)
+    await expect(mockSimulationAdapter.getRunSimulation(DEMO_RUN_ID)).rejects.toThrow(
+      /VITE_USE_MOCKS/,
+    )
   })
 
   it('serves a deterministic demo recording for the demo run only', async () => {
@@ -26,9 +28,15 @@ describe('mock simulation adapter', () => {
     expect(first?.environment.run_id).toBe(DEMO_RUN_ID)
     expect(first?.environment.environment_version).toBe('warehouse_v1')
     // Start and goal never overlap obstacles, and stay inside the grid.
-    const obstacleKeys = new Set((first?.environment.obstacles ?? []).map((cell) => `${cell.row},${cell.col}`))
-    expect(obstacleKeys.has(`${first?.environment.start.row},${first?.environment.start.col}`)).toBe(false)
-    expect(obstacleKeys.has(`${first?.environment.goal.row},${first?.environment.goal.col}`)).toBe(false)
+    const obstacleKeys = new Set(
+      (first?.environment.obstacles ?? []).map((cell) => `${cell.row},${cell.col}`),
+    )
+    expect(
+      obstacleKeys.has(`${first?.environment.start.row},${first?.environment.start.col}`),
+    ).toBe(false)
+    expect(obstacleKeys.has(`${first?.environment.goal.row},${first?.environment.goal.col}`)).toBe(
+      false,
+    )
   })
 
   it('places the fault marker only at the recorded event timestep', async () => {

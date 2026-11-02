@@ -7,7 +7,12 @@
  * validates recorded state through these helpers instead of re-deriving
  * rules ad hoc, so visual rendering and validation stay consistent.
  */
-import type { SimulationReplay, TrajectoryPoint, WarehouseCell, WarehouseEnvironmentSnapshot } from '../schemas/simulation'
+import type {
+  SimulationReplay,
+  TrajectoryPoint,
+  WarehouseCell,
+  WarehouseEnvironmentSnapshot,
+} from '../schemas/simulation'
 
 /** Two cells refer to the same grid position. */
 export function cellsEqual(a: WarehouseCell, b: WarehouseCell): boolean {
@@ -16,7 +21,14 @@ export function cellsEqual(a: WarehouseCell, b: WarehouseCell): boolean {
 
 /** The cell lies within a `rows x cols` grid. */
 export function cellInsideGrid(cell: WarehouseCell, rows: number, cols: number): boolean {
-  return Number.isInteger(cell.row) && Number.isInteger(cell.col) && cell.row >= 0 && cell.col >= 0 && cell.row < rows && cell.col < cols
+  return (
+    Number.isInteger(cell.row) &&
+    Number.isInteger(cell.col) &&
+    cell.row >= 0 &&
+    cell.col >= 0 &&
+    cell.row < rows &&
+    cell.col < cols
+  )
 }
 
 /** Manhattan 4-neighbour distance (0 = same cell). */
@@ -53,9 +65,13 @@ export function findLayoutIssues(snapshot: WarehouseEnvironmentSnapshot): string
   }
   for (const obstacle of obstacles) {
     if (!cellInsideGrid(obstacle, rows, cols)) {
-      issues.push(`An obstacle cell (${obstacle.row}, ${obstacle.col}) lies outside the recorded grid.`)
+      issues.push(
+        `An obstacle cell (${obstacle.row}, ${obstacle.col}) lies outside the recorded grid.`,
+      )
     } else if (cellsEqual(obstacle, start) || cellsEqual(obstacle, goal)) {
-      issues.push(`An obstacle overlaps the recorded ${cellsEqual(obstacle, start) ? 'start' : 'goal'} cell.`)
+      issues.push(
+        `An obstacle overlaps the recorded ${cellsEqual(obstacle, start) ? 'start' : 'goal'} cell.`,
+      )
     }
   }
   return issues
@@ -110,7 +126,10 @@ export function findTrajectoryIssues(replay: SimulationReplay): string[] {
  * latest recorded point whose timestep is `<= requested`. Returns `-1`
  * before the recording starts (nothing has happened yet).
  */
-export function trajectoryIndexForTimestep(trajectory: TrajectoryPoint[], timestep: number): number {
+export function trajectoryIndexForTimestep(
+  trajectory: TrajectoryPoint[],
+  timestep: number,
+): number {
   let low = 0
   let high = trajectory.length - 1
   let best = -1

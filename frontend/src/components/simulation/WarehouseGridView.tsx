@@ -41,7 +41,11 @@ function centeredAt(cx: number, cy: number, testId: string, children: ReactNode)
   )
 }
 
-export function WarehouseGridView({ replay, timestep, options = DEFAULT_DISPLAY_OPTIONS }: WarehouseGridViewProps) {
+export function WarehouseGridView({
+  replay,
+  timestep,
+  options = DEFAULT_DISPLAY_OPTIONS,
+}: WarehouseGridViewProps) {
   const { environment, trajectory, faultMarkers } = replay
   const { rows, cols, start, goal, obstacles } = environment
 
@@ -92,7 +96,15 @@ export function WarehouseGridView({ replay, timestep, options = DEFAULT_DISPLAY_
       fontFamily="var(--font-sans)"
     >
       {/* Floor frame and grid lines */}
-      <rect x={0} y={0} width={width} height={height} fill="none" stroke="var(--border-primary)" strokeWidth={1} />
+      <rect
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        fill="none"
+        stroke="var(--border-primary)"
+        strokeWidth={1}
+      />
       {Array.from({ length: rows - 1 }, (_, index) => (
         <line
           key={`h${index}`}
@@ -119,7 +131,8 @@ export function WarehouseGridView({ replay, timestep, options = DEFAULT_DISPLAY_
       {/* Obstacles: filled shelf cells, display-only toggle */}
       {options.showObstacles &&
         obstacles.map((obstacle) => {
-          if (!cellInsideGrid(obstacle, rows, cols) || cellIsObstacle(obstacle, [start, goal])) return null
+          if (!cellInsideGrid(obstacle, rows, cols) || cellIsObstacle(obstacle, [start, goal]))
+            return null
           const origin = cellOrigin(obstacle)
           return (
             <rect
@@ -192,7 +205,12 @@ export function WarehouseGridView({ replay, timestep, options = DEFAULT_DISPLAY_
       {drawnMarkers.map(({ marker, cell }) => {
         const origin = cellOrigin(cell)
         return (
-          <g key={marker.event_id} data-testid="fault-marker" data-event-id={marker.event_id} transform={`translate(${origin.x + CELL / 2}, ${origin.y + CELL / 2})`}>
+          <g
+            key={marker.event_id}
+            data-testid="fault-marker"
+            data-event-id={marker.event_id}
+            transform={`translate(${origin.x + CELL / 2}, ${origin.y + CELL / 2})`}
+          >
             <circle r={CELL / 3.2} fill="none" stroke="var(--text-primary)" strokeWidth={1.4} />
             <path
               d={`M ${-CELL / 6} ${-CELL / 6} L ${CELL / 6} ${CELL / 6} M ${CELL / 6} ${-CELL / 6} L ${-CELL / 6} ${CELL / 6}`}
@@ -206,7 +224,10 @@ export function WarehouseGridView({ replay, timestep, options = DEFAULT_DISPLAY_
       })}
 
       {/* Agent marker at the playback cursor, display-only toggle */}
-      {options.showAgent && cursorPoint && agentOrigin && cellInsideGrid(cursorPoint.cell, rows, cols)
+      {options.showAgent &&
+      cursorPoint &&
+      agentOrigin &&
+      cellInsideGrid(cursorPoint.cell, rows, cols)
         ? centeredAt(
             agentOrigin.x,
             agentOrigin.y,
