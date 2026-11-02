@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ApplicationShell } from '../components/layout/ApplicationShell'
 import { Panel } from '../components/ui/Panel'
 import { DataTable, DataTableColumn } from '../components/ui/DataTable'
@@ -7,7 +7,7 @@ import { EmptyState } from '../components/ui/EmptyState'
 import { FilterBar } from '../components/ui/FilterBar'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { UnavailableState } from '../components/ui/UnavailableState'
-import { filterRuns, RunSummary } from '../features/reports/runHistory'
+import { filterRuns, runDetailPath, RunSummary } from '../features/reports/runHistory'
 import { useServiceQuery } from '../hooks/useServiceQuery'
 import { createEvaluationService, type EvaluationService } from '../services/evaluation'
 import { EvaluationPanel } from '../features/evaluation/EvaluationPanel'
@@ -24,7 +24,7 @@ const columns: DataTableColumn<RunSummary>[] = [
     mono: true,
     truncate: true,
     title: (run) => run.id,
-    render: (run) => run.id,
+    render: (run) => <Link to={runDetailPath(run.id)}>{run.id}</Link>,
   },
   {
     id: 'environment',
