@@ -94,7 +94,7 @@ def build_registry(s: AISettings) -> dict[Task, TaskSpec]:
         ok, reason = capability(model, Modality.TEXT, s.enable_wonder or not wonder,
                                 "Muse Wonder (preview) is disabled by META_WONDER_ENABLED")
         return TaskSpec(
-            task, meta, model, Modality.TEXT, enabled=ok, disabled_reason=reason, max_tokens=4096,
+            task, meta, model, Modality.TEXT, enabled=ok, disabled_reason=reason, max_tokens=8192,
             fallback=fallback if s.enable_fallback else None, output_schema=schema, preview=wonder, **common,
         )
 
