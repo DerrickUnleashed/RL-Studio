@@ -1,40 +1,24 @@
 /**
- * Intent & requirements service (@planned contract).
- *
- * The Person 3 backend endpoints do not exist yet. Two modes:
+ * Intent & requirements service for the Training page. Two modes:
  *
  * - `VITE_USE_MOCKS=true`: delegates to the labeled mock adapter
  *   (`src/mocks/intentRequirements.ts`) and returns payloads wrapped in
  *   `MockData`, carrying the shared `Sample data` label.
- * - otherwise: issues real HTTP calls against the documented planned paths
- *   below. Until those endpoints are implemented the caller receives honest
- *   `not_found` / `unavailable` error results — the UI must render them as a
- *   pending-backend state, never as empty data (§16.2).
- *
- * Paths are annotated `@planned` and must be confirmed with the backend owner
- * before any production binding. The mock/real switch is interface-level only
- * so presentation stays unchanged across it.
+ * - otherwise: the real project-scoped pipeline (see `realAdapter`).
  */
 import type {
-  IntentSubmissionRequest,
   IntentSubmissionResult,
   RequirementDecision,
   RequirementRecord,
 } from '../schemas/intent'
 import type { MockData } from '../mocks/index'
 import type { ServiceResult } from './types'
-import { api } from './client'
+import type { ProjectRequirement, IntentSubmitResult } from '../schemas/projects'
+import { createProjectService } from './projects'
+import { getProjectScope } from './projectScope'
+import { serviceError } from './types'
 import { mocksEnabled } from '../mocks/index'
 import { mockIntentRequirementsAdapter } from '../mocks/intentRequirements'
-
-/** @planned POST intent text for extraction. */
-export const INTENT_SUBMIT_PATH = '/api/v1/intents'
-/** @planned list of previously confirmed/rejected requirements. */
-export const REQUIREMENTS_LIST_PATH = '/api/v1/requirements'
-/** @planned record a review decision for a requirement draft. */
-export function requirementDecisionPath(requirementId: string): string {
-  return `/api/v1/requirements/${encodeURIComponent(requirementId)}/review-decision`
-}
 
 export type IntentSubmissionOutcome = ServiceResult<
   IntentSubmissionResult | MockData<IntentSubmissionResult>
@@ -49,19 +33,69 @@ export interface IntentRequirementsService {
   ): Promise<ServiceResult<RequirementRecord | MockData<RequirementRecord>>>
 }
 
-/** Real-mode calls against the planned endpoints; returns honest errors until they exist. */
+/**
+ * Real mode binds the project-scoped Intent-to-Verification pipeline (`backend/api/routers/projects.py`):
+ * `POST /projects/{id}/intents`, `GET /projects/{id}/requirements`, `POST .../requirements/{rid}/confirm|reject`.
+ * A project must be active; nothing is invented when none is.
+ */
+const NO_PROJECT = serviceError('invalid_request', 'Open a project first: requirements belong to a project.')
+
+function toDraft(r: ProjectRequirement): RequirementRecord {
+  const confirmed = r.confirmation_status === 'confirmed'
+  return {
+    requirement_id: r.requirement_id,
+    description: r.description || r.source_statement,
+    rule_type: r.category ?? null,
+    parameters: r.comparison_operator
+      ? { comparison_operator: r.comparison_operator, expected_value: r.expected_value }
+      : null,
+    tolerance: r.tolerance ?? null,
+    // the backend never marks a model-extracted requirement as user-authored until the user confirms it
+    source: confirmed ? 'developer_confirmed' : 'code_inferred',
+    confirmed,
+    environment_version: null,
+    source_version: null,
+    created_at: null,
+  }
+}
+
+function toSubmission(result: IntentSubmitResult): IntentSubmissionResult {
+  const reqs = result.intents.flatMap((i) => (i.requirements ?? []) as ProjectRequirement[])
+  const warnings = result.intents
+    .map((i) => i.status_reason)
+    .filter((w): w is string => typeof w === 'string' && w.length > 0)
+  const unclear = reqs.some((r) => r.lifecycle_status === 'needs_clarification' || r.lifecycle_status === 'invalid')
+  return {
+    schema_version: '1.0',
+    extraction_status: reqs.length === 0 ? 'unsupported' : unclear ? 'ambiguous' : 'accepted',
+    warnings: reqs.length === 0 && warnings.length === 0 ? ['No verifiable requirement was extracted.'] : warnings,
+    requirements: reqs.map(toDraft),
+    timestamp: null,
+  }
+}
+
 const realAdapter: IntentRequirementsService = {
-  submitIntent(text: string) {
-    const request: IntentSubmissionRequest = { schema_version: '1.0', text }
-    return api.post<IntentSubmissionResult>(INTENT_SUBMIT_PATH, { jsonBody: request })
+  async submitIntent(text: string) {
+    const projectId = getProjectScope()
+    if (!projectId) return NO_PROJECT
+    const res = await createProjectService().submitIntent(projectId, { statement: text })
+    return res.state === 'ok' ? { state: 'ok', data: toSubmission(res.data) } : res
   },
-  listRequirements() {
-    return api.get<RequirementRecord[]>(REQUIREMENTS_LIST_PATH)
+  async listRequirements() {
+    const projectId = getProjectScope()
+    if (!projectId) return NO_PROJECT
+    const res = await createProjectService().listRequirements(projectId)
+    return res.state === 'ok' ? { state: 'ok', data: res.data.map(toDraft) } : res
   },
-  decideRequirement(requirementId: string, decision: RequirementDecision) {
-    return api.post<RequirementRecord>(requirementDecisionPath(requirementId), {
-      jsonBody: { decision },
-    })
+  async decideRequirement(requirementId: string, decision: RequirementDecision) {
+    const projectId = getProjectScope()
+    if (!projectId) return NO_PROJECT
+    const service = createProjectService()
+    const res =
+      decision === 'confirm'
+        ? await service.confirmRequirement(projectId, requirementId)
+        : await service.rejectRequirement(projectId, requirementId)
+    return res.state === 'ok' ? { state: 'ok', data: toDraft(res.data) } : res
   },
 }
 
