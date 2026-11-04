@@ -1,6 +1,7 @@
 @import './tokens.css';
 @import './layout.css';
 @import './controls.css';
+@import './shell.css';
 
 :root {
   font-family: var(--font-sans);
