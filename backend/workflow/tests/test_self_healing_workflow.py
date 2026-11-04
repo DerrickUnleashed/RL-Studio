@@ -49,7 +49,7 @@ def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
         for session in list(manager._sessions.values()):
             try:
                 session.stop()
-            except Exception:  # noqa: BLE001
+            except Exception: # noqa: BLE001, S110
                 pass
     manager._sessions.clear()
     mp.undo()
@@ -197,7 +197,10 @@ STRICT = "the final episode reward must be at least 100000"
 
 
 def test_7_a_strict_confirmed_requirement_fails_deterministically_and_opens_one_incident(client: TestClient) -> None:
-    from backend.verification.tests.phase3_support import reward_proposal, statements_json
+    from backend.verification.tests.phase3_support import (
+        reward_proposal,
+        statements_json,
+    )
 
     pid, run = STATE["pid"], STATE["run"]
     provider = ScriptedProvider(statements_json(STRICT), [reward_proposal(STRICT, value=100000)])
@@ -230,7 +233,7 @@ def test_7_a_strict_confirmed_requirement_fails_deterministically_and_opens_one_
 
 
 def test_8_incident_diagnosis_is_grounded_and_recovery_options_never_execute(client: TestClient) -> None:
-    pid, run, inc = STATE["pid"], STATE["run"], STATE["incident"]
+    pid, _run, inc = STATE["pid"], STATE["run"], STATE["incident"]
     meta = Meta()
     meta.root_cause = {
         "summary": "The requirement threshold is far above what a 2000-step run reaches.",
