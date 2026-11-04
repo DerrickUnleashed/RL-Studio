@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { ApplicationShell } from '../components/layout/ApplicationShell'
+import { PageHeader } from '../components/layout/PageHeader'
 import { Panel } from '../components/ui/Panel'
 import { MetricCard } from '../components/ui/MetricCard'
 import { EmptyState } from '../components/ui/EmptyState'
@@ -117,49 +118,21 @@ export function TrainingPage() {
   return (
     <ApplicationShell>
       <div className="page-stack">
-        <div className="page-header">
-          <div>
-            <h1
-              style={{
-                fontSize: 'var(--text-2xl)',
-                fontWeight: 600,
-                margin: 0,
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-sans)',
-              }}
+        <PageHeader
+          eyebrow="Training"
+          title="Training Dashboard"
+          description="Configure and monitor reinforcement-learning runs"
+          actions={
+            <button
+              type="button"
+              className="btn btn--solid"
+              onClick={focusRunScope}
+              title="Enter a run identifier in the Run lifecycle panel below. The backend has no separate run-creation endpoint."
             >
-              Training Dashboard
-            </h1>
-            <p
-              style={{
-                fontSize: 'var(--text-base)',
-                color: 'var(--text-secondary)',
-                margin: '4px 0 0 0',
-                fontFamily: 'var(--font-sans)',
-              }}
-            >
-              Configure and monitor reinforcement-learning runs
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={focusRunScope}
-            title="Enter a run identifier in the Run lifecycle panel below. The backend has no separate run-creation endpoint."
-            style={{
-              padding: '8px 16px',
-              background: 'var(--text-primary)',
-              color: 'var(--bg-primary)',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: 'var(--text-base)',
-              fontFamily: 'var(--font-sans)',
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            New Training Run
-          </button>
-        </div>
+              New Training Run
+            </button>
+          }
+        />
 
         <Panel
           title="Run lifecycle"

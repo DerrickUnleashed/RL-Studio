@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useActiveProject } from '../contexts/ActiveProjectContext'
-import { useSelectedRun, type SelectedRun } from '../hooks/useSelectedRun'
+import { PageHeader } from '../components/layout/PageHeader'
+import { useSelectedRun } from '../hooks/useSelectedRun'
 import { RunContextBar } from '../features/trainingHistory/RunContextBar'
 import { ApplicationShell } from '../components/layout/ApplicationShell'
 import { Panel } from '../components/ui/Panel'
@@ -233,34 +233,12 @@ export function DiagnosisRecoveryPage() {
   return (
     <ApplicationShell>
       <div className="page-stack">
-        <div className="page-header">
-          <div>
-            <h1
-              style={{
-                fontSize: 'var(--text-2xl)',
-                fontWeight: 600,
-                margin: 0,
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-sans)',
-              }}
-            >
-              Diagnosis &amp; Recovery
-            </h1>
-            <p
-              style={{
-                fontSize: 'var(--text-base)',
-                color: 'var(--text-secondary)',
-                margin: '4px 0 0 0',
-                fontFamily: 'var(--font-sans)',
-                maxWidth: '78ch',
-              }}
-            >
-              Ask the assistant anything, investigate recorded incidents with AI, and recover under your
-              authorization, validated by a real evaluation.
-            </p>
-          </div>
-          <StatusBadge label="Advisory analysis" tone="quiet" glyph="query" />
-        </div>
+        <PageHeader
+          eyebrow="Evidence review"
+          title="Diagnosis & Recovery"
+          description="AI-assisted interpretation of recorded evidence, incident investigation, and validated recovery workflows."
+          actions={<StatusBadge label="Advisory analysis" tone="quiet" glyph="query" />}
+        />
 
         <RunContextBar selected={selected} />
 

@@ -94,15 +94,19 @@ export function TopNavigation() {
 
   return (
     <header
+      className="app-nav"
       style={{
-        position: 'relative',
+        position: 'sticky',
+        top: 0,
+        zIndex: 30,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 var(--space-6)',
-        height: '56px',
+        height: 'var(--header-h)',
         background: 'var(--bg-header)',
         borderBottom: '1px solid var(--border-primary)',
+        backdropFilter: 'blur(12px)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}>
