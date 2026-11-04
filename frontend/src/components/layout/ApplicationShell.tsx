@@ -7,11 +7,9 @@ interface ApplicationShellProps {
 
 export function ApplicationShell({ children }: ApplicationShellProps) {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <div className="app-shell">
       <TopNavigation />
-      <main style={{ padding: 'var(--space-6)', maxWidth: '1400px', margin: '0 auto' }}>
-        {children}
-      </main>
+      <main className="app-main">{children}</main>
     </div>
   )
 }
