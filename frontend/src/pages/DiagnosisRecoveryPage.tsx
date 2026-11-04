@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../components/layout/PageHeader'
-import { useSelectedRun } from '../hooks/useSelectedRun'
+import { useSelectedRun, type SelectedRun } from '../hooks/useSelectedRun'
+import { useActiveProject } from '../contexts/ActiveProjectContext'
 import { RunContextBar } from '../features/trainingHistory/RunContextBar'
 import { ApplicationShell } from '../components/layout/ApplicationShell'
 import { Panel } from '../components/ui/Panel'
@@ -116,7 +117,7 @@ function IncidentWorkspace({
   const detail = selected.detail
   const checkpoints = useMemo(() => checkpointChoices(detail?.checkpoints ?? []), [detail])
   const existing = useMemo(
-    () => (detail?.recoveries ?? []).filter((r) => r.incident_id === incidentId),
+    () => (detail?.recoveries ?? []).filter((r: { incident_id: string }) => r.incident_id === incidentId),
     [detail, incidentId],
   )
   const useOption = useCallback((option: RecoveryOption) => {
