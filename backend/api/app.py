@@ -5,6 +5,9 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from backend.core.config import settings
 
 from backend.database.config import DatabaseConfig
 from backend.database.connection import Database
@@ -68,6 +71,14 @@ def create_app(config: DatabaseConfig | None = None) -> FastAPI:
             "causal damage, and recovery execution is not recovery success."
         ),
         lifespan=_lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     install_error_handlers(app)
