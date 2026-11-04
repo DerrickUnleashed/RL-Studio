@@ -192,7 +192,7 @@ def run_probes(settings: AISettings, only: tuple[str, ...] = ALL_PROBES) -> list
     listed = service.verify_models() if service.client.configured else {}
 
     def _ask(sp: Any) -> dict[str, Any]:
-        return service.client.respond(sp.model, [{"role": "user", "content": PROBE_PROMPT}], max_tokens=64, retries=0)
+        return service.client.respond(sp.model, [{"role": "user", "content": PROBE_PROMPT}], max_tokens=1024, retries=0)
 
     probes: list[Probe] = []
     if "spark" in only:

@@ -43,6 +43,9 @@ logger = logging.getLogger(__name__)
 
 PROVIDER = "meta"
 MAX_BACKOFF_SECONDS = 8.0
+#: a reasoning model that exhausts a small max_output_tokens before any text is retried once with this multiple (capped)
+REASONING_BUDGET_FACTOR = 16
+MAX_OUTPUT_TOKENS_CEILING = 8192
 #: optional request parameters Meta may reject for a given model; dropped once (and retried) when named in a HTTP 400
 DROPPABLE_PARAMS = frozenset({"temperature", "max_output_tokens", "metadata", "reasoning", "response_format"})
 SAM_METADATA = {"mask_encoding": "one_bit", "include_confidence": "true"}
@@ -170,6 +173,15 @@ class MetaClient:
         """Meta applies the ``system`` role at the developer level; send ``developer`` as documented."""
         return [{**m, "role": "developer" if m.get("role") == "system" else m.get("role")} for m in messages]
 
+    @staticmethod
+    def _budget_exhausted(resp: Any) -> bool:
+        """True when a response stopped at ``max_output_tokens`` without producing visible text."""
+        details = getattr(resp, "incomplete_details", None)
+        if getattr(resp, "status", None) != "incomplete" or getattr(details, "reason", None) != "max_output_tokens":
+            return False
+        text = getattr(resp, "output_text", None)
+        return not (isinstance(text, str) and text.strip())
+
     def respond(
         self,
         model: str,
@@ -188,8 +200,17 @@ class MetaClient:
         if max_tokens:
             params["max_output_tokens"] = max_tokens
         resp = self._call(model, retries, lambda: sdk.responses.create(model=model, **params), params)
+        if self._budget_exhausted(resp) and params.get("max_output_tokens"):
+            # Muse models spend hidden reasoning tokens against max_output_tokens: a small cap can leave no visible text.
+            params["max_output_tokens"] = min(int(params["max_output_tokens"]) * REASONING_BUDGET_FACTOR, MAX_OUTPUT_TOKENS_CEILING)
+            logger.info("meta response hit max_output_tokens before any text; retrying once with %s", params["max_output_tokens"])
+            resp = self._call(model, retries, lambda: sdk.responses.create(model=model, **params), params)
         text = getattr(resp, "output_text", None)
         if not isinstance(text, str) or not text.strip():
+            if self._budget_exhausted(resp):
+                raise AIInvalidResponseError(
+                    "Meta used the whole output token budget on reasoning and returned no text; raise the token limit",
+                    provider=PROVIDER, model=model)
             raise AIInvalidResponseError("Meta returned an empty response", provider=PROVIDER, model=model)
         return {
             "text": text,
