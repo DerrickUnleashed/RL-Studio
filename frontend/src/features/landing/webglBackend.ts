@@ -479,6 +479,7 @@ export function createWebGLBackend(
       bindFloat(r.spriteBuffer, r.attr.pos, 2, spriteStride, 0)
       bindFloat(r.spriteBuffer, r.attr.info, 2, spriteStride, 8)
       context.uniform1f(r.sPxScale, pxScale)
+      context.uniform3f(r.sColor, cr, cg, cb)
       context.drawArrays(context.POINTS, 0, n)
       context.disableVertexAttribArray(r.attr.pos)
       context.disableVertexAttribArray(r.attr.info)
