@@ -9,6 +9,7 @@ import { LiveStatsPanel, LiveStatRow } from '../features/monitoring/LiveStatsPan
 import { LiveConnectionStatus } from '../features/monitoring/LiveConnectionStatus'
 import { MonitoringIcon, MonitoringPanel } from '../features/monitoring/MonitoringPanel'
 import { NoRunSelected } from '../features/monitoring/NoRunSelected'
+import { ProjectIntentPanel } from '../features/projects/ProjectIntentPanel'
 import { RunScopeField } from '../features/monitoring/RunScopeField'
 import { RunLifecycleStatus } from '../features/monitoring/RunLifecycleStatus'
 import { liveEventsToTimeline } from '../features/monitoring/eventPresentation'
@@ -306,6 +307,12 @@ function MonitoringContent({
           )}
         </div>
       </MonitoringPanel>
+
+      {selected.projectId === null ? null : (
+        // Same Intent-to-Verification pipeline as everywhere else: describe expectations in natural language, confirm
+        // the extracted requirements, then verify them against the run selected here (deterministic verdicts).
+        <ProjectIntentPanel projectId={selected.projectId} selectedRunId={selected.runId} />
+      )}
     </div>
   )
 }
