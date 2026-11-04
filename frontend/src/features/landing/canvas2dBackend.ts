@@ -72,10 +72,12 @@ export function createCanvas2DBackend(
       const moved = field.step(dt, state.mouse, state.mouseAmt, layout.aspect)
       this.lastStepMs = moved ? performance.now() - t0 : 0
 
+      const light = typeof document !== 'undefined' &&
+        document.documentElement.getAttribute('data-theme') === 'light'
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, cssWidth, cssHeight)
-      g.globalCompositeOperation = 'lighter'
-      g.fillStyle = '#f0f0f0'
+      g.globalCompositeOperation = light ? 'source-over' : 'lighter'
+      g.fillStyle = light ? '#111111' : '#f0f0f0'
 
       const { assemble, time } = state
       const motion = options.motion ? 1 : 0
@@ -144,10 +146,11 @@ export function createCanvas2DBackend(
         const cx = p.x * cssWidth
         const cy = p.y * cssHeight
         const radius = (size * sizeScale) / 2
+        const rgb = light ? '17,17,17' : '247,247,247'
         const gradient = g.createRadialGradient(cx, cy, 0, cx, cy, radius)
-        gradient.addColorStop(0, `rgba(247,247,247,${Math.min(1, alpha)})`)
-        gradient.addColorStop(0.35, `rgba(247,247,247,${Math.min(1, alpha * 0.28)})`)
-        gradient.addColorStop(1, 'rgba(247,247,247,0)')
+        gradient.addColorStop(0, `rgba(${rgb},${Math.min(1, alpha)})`)
+        gradient.addColorStop(0.35, `rgba(${rgb},${Math.min(1, alpha * 0.28)})`)
+        gradient.addColorStop(1, `rgba(${rgb},0)`)
         g.fillStyle = gradient
         g.beginPath()
         g.arc(cx, cy, radius, 0, Math.PI * 2)

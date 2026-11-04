@@ -7,6 +7,9 @@ import { CubeIcon, CycleIcon, PulseIcon } from '../features/landing/icons'
 import { LandingHero } from '../features/landing/LandingHero'
 import { TechStrip } from '../features/landing/TechStrip'
 import { TelemetrySection } from '../features/landing/TelemetrySection'
+import { IncidentSpotlight } from '../features/landing/IncidentSpotlight'
+import { WorkflowSteps } from '../features/landing/WorkflowSteps'
+import { FooterCTA } from '../features/landing/FooterCTA'
 import { useReveal } from '../features/landing/useReveal'
 import { useTranslation } from 'react-i18next'
 import '../features/landing/landing.css'
@@ -86,12 +89,14 @@ export function HomePage() {
       </LandingBackdrop>
 
       <div className="ls-bridge" aria-hidden="true" />
+      <IncidentSpotlight />
       <TelemetrySection />
       <TechStrip />
+      <WorkflowSteps />
 
       <section id="overview" className="ls-overview" aria-labelledby="ls-overview-title">
         <h2 id="ls-overview-title" className="ls-overview__title">
-          {t('landing.hero.title')}
+          What RL Studio does
         </h2>
         <div className="ls-overview__grid">
           {pillars.map((pillar, index) => (
@@ -99,6 +104,8 @@ export function HomePage() {
           ))}
         </div>
       </section>
+
+      <FooterCTA />
     </div>
   )
 }
