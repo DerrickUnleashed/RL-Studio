@@ -96,7 +96,7 @@ export function HomePage() {
 
       <section id="overview" className="ls-overview" aria-labelledby="ls-overview-title">
         <h2 id="ls-overview-title" className="ls-overview__title">
-          {t('landing.hero.title')}
+          What RL Studio does
         </h2>
         <div className="ls-overview__grid">
           {pillars.map((pillar, index) => (
