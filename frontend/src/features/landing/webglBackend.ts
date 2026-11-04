@@ -100,12 +100,13 @@ precision mediump float;
 #endif
 varying float vAlpha;
 varying float vBright;
+uniform vec3 uColor;
 
 void main() {
   float d = length(gl_PointCoord - 0.5);
   float shape = 1.0 - smoothstep(0.12, 0.5, d);
   float a = clamp(shape * vAlpha * min(vBright, 2.6), 0.0, 1.0);
-  gl_FragColor = vec4(vec3(0.94) * a, a);
+  gl_FragColor = vec4(vec3(uColor) * a, a);
 }
 `
 
@@ -131,12 +132,13 @@ precision highp float;
 precision mediump float;
 #endif
 varying float vAlpha;
+uniform vec3 uColor;
 
 void main() {
   float d = length(gl_PointCoord - 0.5) * 2.0;
   if (d > 1.0) discard;
   float a = clamp(pow(max(1.0 - d, 0.0), 2.2) * vAlpha, 0.0, 1.0);
-  gl_FragColor = vec4(vec3(0.97) * a, a);
+  gl_FragColor = vec4(vec3(uColor) * a, a);
 }
 `
 
@@ -199,6 +201,7 @@ interface Resources {
   spriteBuffer: WebGLBuffer
   u: Record<string, WebGLUniformLocation | null>
   sPxScale: WebGLUniformLocation | null
+  sColor: WebGLUniformLocation | null
   attr: { base: number; scatter: number; meta: number; disp: number; pos: number; info: number }
 }
 
@@ -217,6 +220,7 @@ const UNIFORMS = [
   'uHazardBoost',
   'uRippleRadius',
   'uRippleAmt',
+  'uColor',
 ]
 
 /** Returns null (after a console.error) when WebGL cannot be used. */
@@ -300,6 +304,7 @@ export function createWebGLBackend(
       spriteBuffer,
       u,
       sPxScale: context.getUniformLocation(spriteProgram, 'uPxScale'),
+      sColor: context.getUniformLocation(spriteProgram, 'uColor'),
       attr: {
         base: context.getAttribLocation(particleProgram, 'aBase'),
         scatter: context.getAttribLocation(particleProgram, 'aScatter'),
@@ -415,13 +420,16 @@ export function createWebGLBackend(
       const moved = field.step(dt, state.mouse, state.mouseAmt, layout.aspect)
       this.lastStepMs = moved ? performance.now() - t0 : 0
 
+      const light = typeof document !== 'undefined' &&
+        document.documentElement.getAttribute('data-theme') === 'light'
       context.viewport(0, 0, context.drawingBufferWidth, context.drawingBufferHeight)
       context.clearColor(0, 0, 0, 0)
       context.clear(context.COLOR_BUFFER_BIT)
       context.enable(context.BLEND)
-      context.blendFunc(context.ONE, context.ONE) // premultiplied additive: dust accumulates into glow
+      context.blendFunc(light ? context.SRC_ALPHA : context.ONE, light ? context.ONE_MINUS_SRC_ALPHA : context.ONE)
 
       const agent = state.agentPoint()
+      const [cr, cg, cb] = light ? [0.07, 0.07, 0.07] : [0.94, 0.94, 0.94]
 
       context.useProgram(r.particleProgram)
       const stride = PARTICLE_STRIDE * 4
@@ -448,6 +456,7 @@ export function createWebGLBackend(
       context.uniform1f(u.uHazardBoost, state.hazardBoost)
       context.uniform1f(u.uRippleRadius, state.rippleRadius)
       context.uniform1f(u.uRippleAmt, state.rippleAmt)
+      context.uniform3f(u.uColor, cr, cg, cb)
       context.drawArrays(context.POINTS, 0, count)
       for (const loc of [r.attr.base, r.attr.scatter, r.attr.meta, r.attr.disp]) {
         context.disableVertexAttribArray(loc)
