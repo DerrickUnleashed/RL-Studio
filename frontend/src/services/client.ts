@@ -32,6 +32,8 @@ interface RequestOptions extends Omit<RequestInit, 'signal' | 'body'> {
   jsonBody?: unknown
   /** Optional caller-owned cancellation signal. */
   signal?: AbortSignal
+  /** Overrides the client timeout for slow operations (model calls, policy rollouts). */
+  timeoutMs?: number
 }
 
 /**
@@ -81,10 +83,43 @@ export const MESSAGES: Record<ServiceErrorKind, string> = {
   unexpected: 'The service returned an unexpected response.',
 }
 
-function errorResult(kind: ServiceErrorKind, status?: number): ServiceResult<never> {
+function errorResult(
+  kind: ServiceErrorKind,
+  status?: number,
+  extra: { code?: string; detail?: string } = {},
+): ServiceResult<never> {
   return {
     state: 'error',
-    error: { kind, message: MESSAGES[kind], ...(status !== undefined ? { status } : {}) },
+    error: {
+      kind,
+      message: MESSAGES[kind],
+      ...(status !== undefined ? { status } : {}),
+      ...(extra.code !== undefined ? { code: extra.code } : {}),
+      ...(extra.detail !== undefined ? { detail: extra.detail } : {}),
+    },
+  }
+}
+
+const MAX_DETAIL = 300
+
+/**
+ * The backend's sanitized `{"error": {"code", "message"}}` body (also nested under FastAPI's `detail`). Only short
+ * strings from that exact shape are surfaced; any other body is ignored so raw exception text can never leak.
+ */
+export function backendErrorDetail(text: string): { code?: string; detail?: string } {
+  try {
+    const body = JSON.parse(text) as { error?: unknown; detail?: { error?: unknown } }
+    const error = (body.error ?? body.detail?.error) as { code?: unknown; message?: unknown } | undefined
+    if (typeof error !== 'object' || error === null) return {}
+    const out: { code?: string; detail?: string } = {}
+    if (typeof error.code === 'string' && error.code.length <= 64) out.code = error.code
+    // The message is only surfaced alongside a stable code: an uncoded body is never shown.
+    if (out.code !== undefined && typeof error.message === 'string' && error.message.trim() !== '') {
+      out.detail = error.message.slice(0, MAX_DETAIL)
+    }
+    return out
+  } catch {
+    return {}
   }
 }
 
@@ -103,10 +138,11 @@ export function recordNotFound<T>(): ServiceResult<T> {
  */
 export function createApiClient(config: ApiClientConfig = {}) {
   const baseUrl = config.baseUrl ?? resolveBaseUrl()
-  const timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS
+  const clientTimeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS
 
   async function request<T>(path: string, options: RequestOptions = {}): Promise<ServiceResult<T>> {
-    const { jsonBody, headers, signal, ...rest } = options
+    const { jsonBody, headers, signal, timeoutMs: requestTimeoutMs, ...rest } = options
+    const timeoutMs = requestTimeoutMs ?? clientTimeoutMs
 
     if (signal?.aborted) {
       return errorResult('cancelled')
@@ -145,7 +181,8 @@ export function createApiClient(config: ApiClientConfig = {}) {
       })
 
       if (!response.ok) {
-        return errorResult(kindForStatus(response.status), response.status)
+        const body = await response.text().catch(() => '')
+        return errorResult(kindForStatus(response.status), response.status, backendErrorDetail(body))
       }
 
       if (response.status === 204) {
