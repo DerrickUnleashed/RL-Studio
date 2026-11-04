@@ -407,38 +407,18 @@ export function RunDetailPage() {
   return (
     <ApplicationShell>
       <div className="page-stack">
-        <div className="page-header">
-          <div>
-            <h1
-              style={{
-                fontSize: 'var(--text-2xl)',
-                fontWeight: 600,
-                margin: 0,
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-sans)',
-              }}
-            >
-              Run {runId}
-            </h1>
-            <p
-              style={{
-                fontSize: 'var(--text-base)',
-                color: 'var(--text-secondary)',
-                margin: '4px 0 0 0',
-                fontFamily: 'var(--font-sans)',
-                maxWidth: '78ch',
-              }}
-            >
-              Unified diagnostic report: every section loads independently, so one section's gap or
-              failure never blocks the rest.
-            </p>
-          </div>
-          <StatusBadge
-            label={incidentId ? 'Incident connected' : 'No incident connected'}
-            tone="quiet"
-            glyph={incidentId ? 'dot' : 'none'}
-          />
-        </div>
+        <PageHeader
+          eyebrow="Run report"
+          title={<>Run <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7em' }}>{runId}</span></>}
+          description="Unified diagnostic report: every section loads independently, so one section's gap or failure never blocks the rest."
+          actions={
+            <StatusBadge
+              label={incidentId ? 'Incident connected' : 'No incident connected'}
+              tone="quiet"
+              glyph={incidentId ? 'dot' : 'none'}
+            />
+          }
+        />
 
         <p style={emptyText}>
           <Link to="/reports">Back to Reports</Link>
