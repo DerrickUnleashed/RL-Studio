@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ApplicationShell } from '../components/layout/ApplicationShell'
+import { PageHeader } from '../components/layout/PageHeader'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { DefinitionList, type DefinitionRow } from '../components/ui/DefinitionList'
 import { StaleDataNotice } from '../components/ui/StaleDataNotice'
