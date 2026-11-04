@@ -18,26 +18,9 @@ class Settings:
             "SUPABASE_URL",
             os.getenv("DATABASE_URL", f"sqlite:///{self.project_root / 'artifacts.db'}"),
         )
-        self.meta_ai_api_key = (
-            os.getenv("XAI_API_KEY")
-            or os.getenv("GROK_API_KEY")
-            or os.getenv("META_AI_API_KEY")
-            or os.getenv("META_API")
-            or os.getenv("MODEL_API_KEY")
-        )
-        self.meta_ai_base_url = (
-            os.getenv("XAI_BASE_URL")
-            or os.getenv("GROK_BASE_URL")
-            or os.getenv("META_AI_BASE_URL")
-            or os.getenv("META_BASE_URL")
-        )
-        self.meta_ai_model = (
-            os.getenv("XAI_MODEL")
-            or os.getenv("GROK_MODEL")
-            or os.getenv("META_AI_MODEL")
-            or os.getenv("META_MODEL")
-            or os.getenv("META_DEFAULT_MODEL")
-        )
+        self.meta_ai_api_key = os.getenv("MODEL_API_KEY")
+        self.meta_ai_base_url = os.getenv("META_API_BASE_URL")
+        self.meta_ai_model = os.getenv("META_DEFAULT_MODEL")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
         self.cors_origins = os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") else ["*"]
 
