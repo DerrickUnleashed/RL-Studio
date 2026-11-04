@@ -136,7 +136,7 @@
   padding: 20px;
   border: 1px solid var(--ls-line);
   border-radius: 14px;
-  background: rgba(10, 10, 10, 0.72);
+  background: var(--lp-card);
   backdrop-filter: blur(6px);
   transition: border-color 160ms ease;
 }
@@ -228,7 +228,7 @@
   border-radius: 14px;
   text-align: center;
   color: var(--ls-dim);
-  background: rgba(10, 10, 10, 0.5);
+  background: var(--lp-card);
 }
 
 .pj-state h2 {
@@ -254,7 +254,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(0, 0, 0, 0.66);
+  background: rgba(0,0,0,0.32);
 }
 
 .pj-dialog {
