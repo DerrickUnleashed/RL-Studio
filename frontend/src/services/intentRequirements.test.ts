@@ -1,11 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import {
-  createIntentRequirementsService,
-  INTENT_SUBMIT_PATH,
-  REQUIREMENTS_LIST_PATH,
-  requirementDecisionPath,
-} from './intentRequirements'
-import { buildRequestUrl } from './client'
+import { createIntentRequirementsService } from './intentRequirements'
+import { setProjectScope } from './projectScope'
 import { MOCK_DATA_LABEL } from '../mocks'
 
 function jsonResponse(status: number, body: unknown): Response {
@@ -15,64 +10,69 @@ function jsonResponse(status: number, body: unknown): Response {
   })
 }
 
-describe('planned request paths', () => {
-  it('encodes the requirement id and uses stable collection paths', () => {
-    expect(buildRequestUrl('http://localhost:8000', INTENT_SUBMIT_PATH)).toBe(
-      'http://localhost:8000/api/v1/intents',
-    )
-    expect(buildRequestUrl('', REQUIREMENTS_LIST_PATH)).toBe('/api/v1/requirements')
-    expect(buildRequestUrl('', requirementDecisionPath('req/goal'))).toBe(
-      '/api/v1/requirements/req%2Fgoal/review-decision',
-    )
-  })
-})
-
-describe('real adapter (mocks disabled)', () => {
+describe('real adapter (mocks disabled): project-scoped pipeline', () => {
   afterEach(() => {
-    vi.unstubAllEnvs()
     vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
+    setProjectScope(null)
   })
 
-  it('submits the schema-versioned payload to the planned endpoint', async () => {
+  it('refuses honestly when no project is active', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
-    const fetchMock = vi.fn(async () =>
-      jsonResponse(200, {
-        schema_version: '1.0',
-        extraction_status: 'accepted',
-        warnings: [],
-        requirements: [],
-        timestamp: null,
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const result = await createIntentRequirementsService().submitIntent('x')
+    expect(result.state).toBe('error')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('posts the statement to the project intents route and maps requirements as unconfirmed', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false')
+    setProjectScope('prj_abc')
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(201, {
+        project_id: 'prj_abc', stage: 'pre_training', run_id: null, requirement_count: 1,
+        intents: [{ status_reason: null, requirements: [{
+          requirement_id: 'req1', description: 'reward >= 200', source_statement: 'reward >= 200',
+          category: 'reward', comparison_operator: '>=', expected_value: 200, tolerance: null,
+          lifecycle_status: 'draft', confirmation_status: 'proposed',
+        }] }],
       }),
     )
     vi.stubGlobal('fetch', fetchMock)
-
-    const service = createIntentRequirementsService()
-    const result = await service.submitIntent('The goal reward must be 100.')
-
-    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
-    expect(url).toBe('/api/v1/intents')
-    expect(init.method).toBe('POST')
-    expect(init.body).toBe(
-      JSON.stringify({ schema_version: '1.0', text: 'The goal reward must be 100.' }),
-    )
+    const result = await createIntentRequirementsService().submitIntent('reward >= 200')
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/projects/prj_abc/intents')
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ statement: 'reward >= 200' })
     expect(result.state).toBe('ok')
+    if (result.state !== 'ok') return
+    const data = result.data as { extraction_status: string; requirements: Array<{ confirmed: boolean; requirement_id: string }> }
+    expect(data.extraction_status).toBe('accepted')
+    expect(data.requirements[0]).toMatchObject({ requirement_id: 'req1', confirmed: false })
   })
 
-  it('returns honest not_found until the planned endpoints are implemented', async () => {
+  it('reports unsupported when the backend extracts nothing, never a fabricated requirement', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => jsonResponse(404, { detail: 'Not Found' })),
-    )
-    const service = createIntentRequirementsService()
+    setProjectScope('prj_abc')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(201, {
+      project_id: 'prj_abc', stage: 'pre_training', run_id: null, requirement_count: 0,
+      intents: [{ status_reason: 'No verifiable expectations', requirements: [] }],
+    })))
+    const result = await createIntentRequirementsService().submitIntent('be good')
+    expect(result.state === 'ok' && (result.data as { extraction_status: string }).extraction_status).toBe('unsupported')
+  })
 
-    const submission = await service.submitIntent('text')
-    expect(submission.state).toBe('error')
-    if (submission.state === 'error') expect(submission.error.kind).toBe('not_found')
-
-    const list = await service.listRequirements()
-    expect(list.state).toBe('error')
-    if (list.state === 'error') expect(list.error.kind).toBe('not_found')
+  it('confirm and reject hit the project requirement routes', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false')
+    setProjectScope('prj_abc')
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(200, {
+      requirement_id: 'req/1', description: 'd', source_statement: 's', category: 'reward', confirmation_status: 'confirmed',
+    })))
+    vi.stubGlobal('fetch', fetchMock)
+    const svc = createIntentRequirementsService()
+    await svc.decideRequirement('req/1', 'confirm')
+    await svc.decideRequirement('req/1', 'reject')
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/projects/prj_abc/requirements/req%2F1/confirm')
+    expect(String(fetchMock.mock.calls[1][0])).toContain('/api/v1/projects/prj_abc/requirements/req%2F1/reject')
   })
 })
 

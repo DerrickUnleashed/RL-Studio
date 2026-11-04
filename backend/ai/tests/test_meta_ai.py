@@ -354,6 +354,31 @@ def test_empty_response_is_rejected():
         service(lambda r: responses_ok("  ")).run_text(Task.INTENT, MSG)
 
 
+def _truncated_by_reasoning() -> httpx.Response:
+    return httpx.Response(200, json={
+        "id": "resp_t", "object": "response", "created_at": 0, "model": "muse-spark-1.3", "status": "incomplete",
+        "incomplete_details": {"reason": "max_output_tokens"},
+        "output": [{"type": "reasoning", "id": "r", "summary": []}],
+        "usage": {"input_tokens": 1, "output_tokens": 64, "total_tokens": 65},
+    })
+
+
+def test_reasoning_budget_exhaustion_is_retried_once_with_a_larger_budget():
+    sent: list[int] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(json.loads(request.content)["max_output_tokens"])
+        return _truncated_by_reasoning() if len(sent) == 1 else responses_ok("OK")
+
+    out = service(handler).client.respond("muse-spark-1.3", MSG, max_tokens=64)
+    assert out["text"] == "OK" and len(sent) == 2 and sent[1] > sent[0]
+
+
+def test_persistent_budget_exhaustion_reports_the_real_cause_not_a_generic_empty_response():
+    with pytest.raises(AIInvalidResponseError, match="token budget"):
+        service(lambda r: _truncated_by_reasoning()).client.respond("muse-spark-1.3", MSG, max_tokens=64)
+
+
 def test_extract_json_finds_an_object_inside_a_preamble():
     assert extract_json('Here you go: {"a": 1} thanks') == {"a": 1}
     with pytest.raises(ValueError):
