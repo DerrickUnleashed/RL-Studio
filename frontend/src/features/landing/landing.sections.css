@@ -133,7 +133,7 @@
   margin: -7px -15px;
   border: 1px solid var(--lp-hair);
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--lp-wash);
 }
 
 @media (max-width: 520px) {
@@ -188,7 +188,7 @@
 }
 
 .ls-strip__item:hover .ls-strip__label {
-  color: #c4c4c4;
+  color: var(--lp-dim);
 }
 
 /* ---------- Transition out of the first screen ---------- */
@@ -349,7 +349,7 @@
   min-width: 0;
   padding: 15px 26px;
   border-left: 1px solid var(--lp-line);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--lp-wash);
 }
 
 .ls-terminal__lines {
@@ -358,7 +358,7 @@
   font-family: var(--ls-mono);
   font-size: 12px;
   line-height: 1.7;
-  color: #8a8a8a;
+  color: var(--lp-dim);
 }
 
 .ls-term__line {
@@ -373,7 +373,7 @@
 
 .ls-term__prompt {
   margin-right: 10px;
-  color: #4a4a4a;
+  color: var(--lp-muted);
 }
 
 .ls-term__cursor {
@@ -523,7 +523,7 @@
   border: 1px solid var(--lp-hair);
   border-radius: 50%;
   background: var(--lp-wash);
-  color: #b4b4b4;
+  color: var(--lp-dim);
   transition:
     color 0.25s ease,
     border-color 0.25s ease,
@@ -687,7 +687,7 @@
 .ls-proof dd {
   margin: 0;
   font-size: 13px;
-  color: #c9c9c9;
+  color: var(--lp-dim);
   white-space: nowrap;
 }
 
@@ -719,12 +719,12 @@
   font-size: clamp(30px, 3.4vw, 48px);
   line-height: 1.12;
   letter-spacing: -0.02em;
-  color: #f1f1ef;
+  color: var(--lp-text);
 }
 
 .ls-incident__title em {
   font-style: italic;
-  color: #9d9d9d;
+  color: var(--lp-dim);
 }
 
 .ls-incident__flow {
@@ -788,10 +788,10 @@
   flex: none;
   width: 30px;
   height: 30px;
-  border: 1px solid rgba(255,255,255,0.16);
+  border: 1px solid var(--lp-hair);
   border-radius: 50%;
   color: var(--lp-muted);
-  background: rgba(0,0,0,0.4);
+  background: var(--lp-wash);
 }
 
 .ls-incident__note {
@@ -819,12 +819,12 @@
   font-weight: 400;
   font-size: clamp(30px, 3.4vw, 48px);
   letter-spacing: -0.02em;
-  color: #f1f1ef;
+  color: var(--lp-text);
 }
 
 .ls-workflow__title em {
   font-style: italic;
-  color: #9d9d9d;
+  color: var(--lp-dim);
 }
 
 .ls-workflow__list {
@@ -869,7 +869,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid var(--lp-hair);
   border-radius: 999px;
   font-size: 13px;
   color: var(--lp-text);
@@ -880,8 +880,8 @@
 
 .ls-workflow__cta:hover,
 .ls-workflow__cta:focus-visible {
-  border-color: rgba(255,255,255,0.55);
-  background: rgba(255,255,255,0.04);
+  border-color: var(--lp-hair-strong);
+  background: var(--lp-wash);
 }
 
 .ls-workflow__arrow {
@@ -898,7 +898,7 @@
 .ls-footer {
   margin-top: 80px;
   border-top: 1px solid var(--ls-line);
-  background: radial-gradient(ellipse 70% 90% at 50% 0%, rgba(255,255,255,0.04), transparent 70%);
+  background: radial-gradient(ellipse 70% 90% at 50% 0%, var(--lp-wash), transparent 70%);
 }
 
 .ls-footer__wrap {
@@ -916,12 +916,12 @@
   font-size: clamp(36px, 4.6vw, 64px);
   line-height: 1.06;
   letter-spacing: -0.025em;
-  color: #f1f1ef;
+  color: var(--lp-text);
 }
 
 .ls-footer__title em {
   font-style: italic;
-  color: #9d9d9d;
+  color: var(--lp-dim);
 }
 
 .ls-footer__sub {
