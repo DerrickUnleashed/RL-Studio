@@ -1,0 +1,1 @@
+{"algorithm": "PPO", "checkpoint_id": "ckpt_d2598051ee2b", "created_at": "2026-11-04T20:51:03.442003+00:00", "environment": "cartpole", "reason": "interval", "run_id": "ses_96fd957e_r1", "session_id": "ses_96fd957e", "sha256": "c54d32dad1cafb36e3a953304b8f0b62003b2fbe575fb2c1ebb00417c202bb23", "size_bytes": 141552, "timestep": 5000}
