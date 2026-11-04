@@ -98,17 +98,23 @@
   --radius-md: 8px;
   --radius-lg: 10px;
 
-  /* Typography */
+  /* Typography — identical scale to dark; only colors switch */
   --font-sans:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
   --text-xs: 11px;
   --text-sm: 12px;
   --text-base: 13px;
   --text-md: 14px;
   --text-lg: 16px;
   --text-xl: 18px;
-  --text-2xl: 24px;
-  --text-3xl: 28px;
+  --text-2xl: clamp(28px, 4vw, 44px);
+  --text-3xl: clamp(32px, 4.6vw, 52px);
+
+  --page-max: 1240px;
+  --header-h: 60px;
+  --lift: 0 8px 32px -12px rgba(0, 0, 0, 0.12);
 }
