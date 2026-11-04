@@ -98,8 +98,8 @@
 }
 
 .pj-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--ls-wash);
+  border-color: var(--ls-hair);
 }
 
 .pj-btn:disabled {
@@ -114,8 +114,8 @@
 }
 
 .pj-btn--solid:hover:not(:disabled) {
-  background: #ffffff;
-  border-color: #ffffff;
+  background: var(--ls-solid-hover);
+  border-color: var(--ls-solid-hover);
 }
 
 .pj-btn--danger {
@@ -142,7 +142,7 @@
 }
 
 .pj-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--ls-hair);
 }
 
 .pj-card__top {
@@ -185,7 +185,7 @@
 
 .pj-chip--state {
   color: var(--ls-text);
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: var(--ls-hair);
 }
 
 .pj-chip--pending {
@@ -265,7 +265,7 @@
   padding: 24px;
   border: 1px solid var(--ls-line);
   border-radius: 14px;
-  background: #0b0b0b;
+  background: var(--lp-card);
   color: var(--ls-text);
   font-family: var(--ls-sans);
 }
@@ -316,7 +316,7 @@
   padding: 9px 12px;
   border: 1px solid var(--ls-line);
   border-radius: 8px;
-  background: #080808;
+  background: var(--lp-bg-2);
   color: var(--ls-text);
   font-family: var(--ls-sans);
   font-size: 13px;
@@ -332,7 +332,7 @@
 .pj-input:hover,
 .pj-select:hover,
 .pj-textarea:hover {
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: var(--ls-hair);
 }
 
 .pj-row {
@@ -344,7 +344,7 @@
 .pj-error {
   margin: 0;
   padding: 8px 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border: 1px dashed var(--ls-hair);
   border-radius: 8px;
   font-size: 12px;
   color: var(--ls-text);
