@@ -14,7 +14,10 @@ class Settings:
         self.debug = os.getenv("DEBUG", "false").lower() == "true"
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", "8000"))
-        self.database_url = os.getenv("DATABASE_URL", f"sqlite:///{self.project_root / 'artifacts.db'}")
+        self.database_url = os.getenv(
+            "SUPABASE_URL",
+            os.getenv("DATABASE_URL", f"sqlite:///{self.project_root / 'artifacts.db'}"),
+        )
         self.meta_ai_api_key = (
             os.getenv("XAI_API_KEY")
             or os.getenv("GROK_API_KEY")
