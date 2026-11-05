@@ -18,6 +18,8 @@ It combines a FastAPI backend with a React / Vite frontend. Training runs in env
 
 Exposure is not proof of causal damage, and recovery execution is not recovery success — the system preserves that distinction throughout.
 
+<a href="https://www.youtube.com/watch?v=F6x8oJTi0fc"><img width="1600" height="900" alt="WhatsApp Image 2026-11-05 at 07 10 41" src="https://github.com/user-attachments/assets/df5be63b-67f7-4c58-bb8e-e1b5fb639689" /></a>
+
 ## Key Features
 
 - **RL studio and training:** PPO training, environment catalog and wrappers, custom parameters, live session management, training history, and real-time event streaming over WebSockets.
@@ -116,57 +118,6 @@ Exposure is not proof of causal damage, and recovery execution is not recovery s
    ```bash
    cd frontend && npm run dev
    ```
-
-## Usage Guide & Examples
-
-**Health check and API discovery:**
-
-```bash
-curl http://127.0.0.1:8000/health
-# Interactive API documentation
-open http://127.0.0.1:8000/docs
-```
-
-**Training lifecycle (API):**
-
-- `POST /api/v1/...` training start, monitoring, history, and evaluation endpoints are exposed under the FastAPI routers in `backend/api/routers/` (`training_history`, `evaluation`, `runs`, `studio`).
-- The React frontend at `frontend/src/pages/` provides Training, Studio, Monitoring, Projects, Diagnosis Recovery, Reports, Run Detail, and Settings pages.
-
-**Fault-injection demo (controlled reward-scaling fault):**
-
-```bash
-python scripts/seed_demo_fault.py
-```
-
-This seeds the canonical demonstration scenario used by verification and diagnosis tests: an observed reward scale that differs from the declared value, which must be confirmed by deterministic checks before any root-cause claim is made.
-
-**Verification, diagnosis, and recovery (API):**
-
-- `POST /api/v1/incidents/{incident_id}/investigations` — bounded, evidence-grounded investigation
-- `/recovery-recommendations` — recovery planning for an incident
-- Verification, incidents, provenance, and recovery routers live in `backend/api/routers/verification.py`, `incidents.py`, `provenance.py`, and `recovery.py`
-
-**Frontend commands:**
-
-```bash
-cd frontend
-npm run dev          # dev server
-npm run build        # production build
-npm run typecheck    # TypeScript check
-npm run lint         # ESLint
-npm test             # Vitest
-```
-
-**Backend commands:**
-
-```bash
-pytest -x -v                          # unit tests
-pytest -m "not slow" -x -v            # skip slow / RL tests
-pytest -x -v tests/integration/       # integration tests
-pytest -x -v tests/end_to_end/        # end-to-end tests
-ruff format && ruff check             # format and lint
-mypy .                                # type check
-```
 
 ## Project Structure
 

@@ -31,12 +31,28 @@ describe('real adapter (mocks disabled): project-scoped pipeline', () => {
     setProjectScope('prj_abc')
     const fetchMock = vi.fn().mockResolvedValue(
       jsonResponse(201, {
-        project_id: 'prj_abc', stage: 'pre_training', run_id: null, requirement_count: 1,
-        intents: [{ status_reason: null, requirements: [{
-          requirement_id: 'req1', description: 'reward >= 200', source_statement: 'reward >= 200',
-          category: 'reward', comparison_operator: '>=', expected_value: 200, tolerance: null,
-          lifecycle_status: 'draft', confirmation_status: 'proposed',
-        }] }],
+        project_id: 'prj_abc',
+        stage: 'pre_training',
+        run_id: null,
+        requirement_count: 1,
+        intents: [
+          {
+            status_reason: null,
+            requirements: [
+              {
+                requirement_id: 'req1',
+                description: 'reward >= 200',
+                source_statement: 'reward >= 200',
+                category: 'reward',
+                comparison_operator: '>=',
+                expected_value: 200,
+                tolerance: null,
+                lifecycle_status: 'draft',
+                confirmation_status: 'proposed',
+              },
+            ],
+          },
+        ],
       }),
     )
     vi.stubGlobal('fetch', fetchMock)
@@ -45,7 +61,10 @@ describe('real adapter (mocks disabled): project-scoped pipeline', () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ statement: 'reward >= 200' })
     expect(result.state).toBe('ok')
     if (result.state !== 'ok') return
-    const data = result.data as { extraction_status: string; requirements: Array<{ confirmed: boolean; requirement_id: string }> }
+    const data = result.data as {
+      extraction_status: string
+      requirements: Array<{ confirmed: boolean; requirement_id: string }>
+    }
     expect(data.extraction_status).toBe('accepted')
     expect(data.requirements[0]).toMatchObject({ requirement_id: 'req1', confirmed: false })
   })
@@ -53,26 +72,48 @@ describe('real adapter (mocks disabled): project-scoped pipeline', () => {
   it('reports unsupported when the backend extracts nothing, never a fabricated requirement', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
     setProjectScope('prj_abc')
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(201, {
-      project_id: 'prj_abc', stage: 'pre_training', run_id: null, requirement_count: 0,
-      intents: [{ status_reason: 'No verifiable expectations', requirements: [] }],
-    })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse(201, {
+          project_id: 'prj_abc',
+          stage: 'pre_training',
+          run_id: null,
+          requirement_count: 0,
+          intents: [{ status_reason: 'No verifiable expectations', requirements: [] }],
+        }),
+      ),
+    )
     const result = await createIntentRequirementsService().submitIntent('be good')
-    expect(result.state === 'ok' && (result.data as { extraction_status: string }).extraction_status).toBe('unsupported')
+    expect(
+      result.state === 'ok' && (result.data as { extraction_status: string }).extraction_status,
+    ).toBe('unsupported')
   })
 
   it('confirm and reject hit the project requirement routes', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false')
     setProjectScope('prj_abc')
-    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(200, {
-      requirement_id: 'req/1', description: 'd', source_statement: 's', category: 'reward', confirmation_status: 'confirmed',
-    })))
+    const fetchMock = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        jsonResponse(200, {
+          requirement_id: 'req/1',
+          description: 'd',
+          source_statement: 's',
+          category: 'reward',
+          confirmation_status: 'confirmed',
+        }),
+      ),
+    )
     vi.stubGlobal('fetch', fetchMock)
     const svc = createIntentRequirementsService()
     await svc.decideRequirement('req/1', 'confirm')
     await svc.decideRequirement('req/1', 'reject')
-    expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/projects/prj_abc/requirements/req%2F1/confirm')
-    expect(String(fetchMock.mock.calls[1][0])).toContain('/api/v1/projects/prj_abc/requirements/req%2F1/reject')
+    expect(String(fetchMock.mock.calls[0][0])).toContain(
+      '/api/v1/projects/prj_abc/requirements/req%2F1/confirm',
+    )
+    expect(String(fetchMock.mock.calls[1][0])).toContain(
+      '/api/v1/projects/prj_abc/requirements/req%2F1/reject',
+    )
   })
 })
 
