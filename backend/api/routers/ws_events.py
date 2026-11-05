@@ -17,15 +17,16 @@ router = APIRouter(prefix="/api/v1", tags=["realtime"])
 @router.websocket("/events/{run_id}")
 async def ws_events_endpoint(websocket: WebSocket, run_id: str) -> None:
     """WebSocket endpoint for real-time event streaming."""
+    project_id = websocket.query_params.get("project_id")
     await websocket.accept()
-    await _stream_events(websocket, run_id)
+    await _stream_events(websocket, run_id, project_id)
 
 
-async def _stream_events(websocket: WebSocket, run_id: str) -> None:
+async def _stream_events(websocket: WebSocket, run_id: str, project_id: str | None = None) -> None:
     """Stream events to the WebSocket client."""
     seen_ids: set[Any] = set()
     while True:
-        events = EventPublisher.get_recent_events(run_id, limit=20)
+        events = EventPublisher.get_recent_events(run_id, project_id=project_id, limit=20)
         if events:
             for event in events:
                 if event.event_id not in seen_ids:
