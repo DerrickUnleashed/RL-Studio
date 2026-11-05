@@ -266,16 +266,22 @@ class EventPublisher:
         return event_id
 
     @staticmethod
-    def get_recent_events(run_id: str, limit: int = 20) -> list[Event]:
-        """Get the most recent events for a given run, ordered by timestamp desc."""
+    def get_recent_events(run_id: str, project_id: str | None = None, limit: int = 20) -> list[Event]:
+        """Get the most recent events for a given run, ordered by timestamp desc.
+
+        Optionally filters by ``project_id`` when provided.
+        """
         database = _database()
         _ensure_schema(database)
         with database.read() as conn:
-            rows = conn.execute(
-                f"SELECT {_COLUMNS} FROM execution_events WHERE run_id = ? "
-                "ORDER BY timestamp DESC, rowid DESC LIMIT ?",
-                (run_id, limit),
-            ).fetchall()
+            query = f"SELECT {_COLUMNS} FROM execution_events WHERE run_id = ?"
+            params: list[Any] = [run_id]
+            if project_id is not None:
+                query += " AND project_id = ?"
+                params.append(project_id)
+            query += " ORDER BY timestamp DESC, rowid DESC LIMIT ?"
+            params.append(limit)
+            rows = conn.execute(query, tuple(params)).fetchall()
         return [_row_to_event(row) for row in rows]
 
     @staticmethod
