@@ -38,7 +38,10 @@ export interface IntentRequirementsService {
  * `POST /projects/{id}/intents`, `GET /projects/{id}/requirements`, `POST .../requirements/{rid}/confirm|reject`.
  * A project must be active; nothing is invented when none is.
  */
-const NO_PROJECT = serviceError('invalid_request', 'Open a project first: requirements belong to a project.')
+const NO_PROJECT = serviceError(
+  'invalid_request',
+  'Open a project first: requirements belong to a project.',
+)
 
 function toDraft(r: ProjectRequirement): RequirementRecord {
   const confirmed = r.confirmation_status === 'confirmed'
@@ -64,11 +67,16 @@ function toSubmission(result: IntentSubmitResult): IntentSubmissionResult {
   const warnings = result.intents
     .map((i) => i.status_reason)
     .filter((w): w is string => typeof w === 'string' && w.length > 0)
-  const unclear = reqs.some((r) => r.lifecycle_status === 'needs_clarification' || r.lifecycle_status === 'invalid')
+  const unclear = reqs.some(
+    (r) => r.lifecycle_status === 'needs_clarification' || r.lifecycle_status === 'invalid',
+  )
   return {
     schema_version: '1.0',
     extraction_status: reqs.length === 0 ? 'unsupported' : unclear ? 'ambiguous' : 'accepted',
-    warnings: reqs.length === 0 && warnings.length === 0 ? ['No verifiable requirement was extracted.'] : warnings,
+    warnings:
+      reqs.length === 0 && warnings.length === 0
+        ? ['No verifiable requirement was extracted.']
+        : warnings,
     requirements: reqs.map(toDraft),
     timestamp: null,
   }
