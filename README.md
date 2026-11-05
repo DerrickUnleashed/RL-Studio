@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Banner -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF007F,100:00F0FF&height=300&section=header&text=Self-Healing%20RL%20Studio&fontSize=70&animation=fadeIn&fontAlignY=38&desc=Train%2C%20detect%2C%20diagnose%2C%20and%20recover%20reinforcement%20learning%20runs%20automatically&descAlignY=55&descAlign=50" width="100%" />
+<img width="1600" height="533" alt="image" src="https://github.com/user-attachments/assets/c872b5f2-ed63-4bf1-83bc-9ddb7aaf1c8e" />
 
 <!-- Badges -->
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
