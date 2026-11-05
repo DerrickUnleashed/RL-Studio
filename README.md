@@ -19,7 +19,8 @@ It combines a FastAPI backend with a React / Vite frontend. Training runs in env
 Exposure is not proof of causal damage, and recovery execution is not recovery success — the system preserves that distinction throughout.
 
 <a href="https://www.youtube.com/watch?v=F6x8oJTi0fc"><img width="1600" height="900" alt="WhatsApp Image 2026-11-05 at 07 10 41" src="https://github.com/user-attachments/assets/df5be63b-67f7-4c58-bb8e-e1b5fb639689" />
-<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/3dbcc28a-636e-40e4-9275-e33af80b3326" /></a>
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/9c9639c2-5994-44aa-aa13-6515f17e817a" />
+</a>
 
 ## Key Features
 
