@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Banner -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF007F,100:00F0FF&height=300&section=header&text=Self-Healing%20RL%20Studio&fontSize=70&animation=fadeIn&fontAlignY=38&desc=Train%2C%20detect%2C%20diagnose%2C%20and%20recover%20reinforcement%20learning%20runs%20automatically&descAlignY=55&descAlign=50" width="100%" />
+<img width="1600" height="533" alt="image" src="https://github.com/user-attachments/assets/c872b5f2-ed63-4bf1-83bc-9ddb7aaf1c8e" />
 
 <!-- Badges -->
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
@@ -18,7 +18,9 @@ It combines a FastAPI backend with a React / Vite frontend. Training runs in env
 
 Exposure is not proof of causal damage, and recovery execution is not recovery success — the system preserves that distinction throughout.
 
-<a href="https://www.youtube.com/watch?v=F6x8oJTi0fc"><img width="1600" height="900" alt="WhatsApp Image 2026-11-05 at 07 10 41" src="https://github.com/user-attachments/assets/df5be63b-67f7-4c58-bb8e-e1b5fb639689" /></a>
+<a href="https://www.youtube.com/watch?v=F6x8oJTi0fc"><img width="1600" height="900" alt="WhatsApp Image 2026-11-05 at 07 10 41" src="https://github.com/user-attachments/assets/df5be63b-67f7-4c58-bb8e-e1b5fb639689" />
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/9c9639c2-5994-44aa-aa13-6515f17e817a" />
+</a>
 
 ## Key Features
 
